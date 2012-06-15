@@ -1,5 +1,4 @@
 # coding=utf-8
-from cStringIO import StringIO
 from zope.cachedescriptors.property import Lazy
 from zope.publisher.base import TestRequest
 from Products.XWFMailingListManager.utils import MAIL_PARAMETER_NAME

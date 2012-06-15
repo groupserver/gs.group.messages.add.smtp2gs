@@ -2,4 +2,10 @@
 <configure xmlns="http://namespaces.zope.org/zope"
   xmlns:browser="http://namespaces.zope.org/browser">
 
+  <browser:page 
+    for="Products.GSContent.interfaces.IGSSiteFolder"
+    name="gs-group-messages-add-group-exists.html"
+    class=".groupexists.GroupExists"
+    permission="zope2.View"/>
+
 </configure>
