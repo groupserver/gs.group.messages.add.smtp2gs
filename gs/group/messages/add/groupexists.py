@@ -34,12 +34,22 @@ class GroupExists(SiteForm):
             retval = l.getId()
         return retval
 
+    def get_site_id(self, emailAddr):
+        try:
+            l = self.mailingListManager.get_listFromMailto(emailAddr)
+        except AttributeError, ae:
+            retval = None
+        else:
+            retval = l.getProperty('siteId')
+        return retval
+
     @form.action(label=u'Check', failure='handle_check_action_failure')
     def handle_check(self, action, data):
         emailAddr = data['email']
         d = {
-            'email': emailAddr, 
+            'email':   emailAddr, 
             'groupId': self.get_group_id(emailAddr),
+            'siteId':  self.get_site_id(emailAddr),
             }
         self.status = u'Done'
         retval = json.dumps(d)
