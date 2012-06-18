@@ -5,50 +5,25 @@ from zope.cachedescriptors.property import Lazy
 from zope.formlib import form
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
 from gs.auth.token import log_auth_error
-from gs.content.form.form import SiteForm
+from base import ListInfoForm
 from interfaces import IGSGroupExists
 
-class GroupExists(SiteForm):
+class GroupExists(ListInfoForm):
     label = u'Check if a group exists'
     pageTemplateFileName = 'browser/templates/groupexists.pt'
     template = ZopeTwoPageTemplateFile(pageTemplateFileName)
     form_fields = form.Fields(IGSGroupExists, render_context=False)
     
     def __init__(self, context, request):
-        SiteForm.__init__(self, context, request)
-
-    @Lazy
-    def mailingListManager(self):
-        assert self.context
-        retval = self.context.ListManager
-        assert retval
-        return retval
-
-    def get_group_id(self, emailAddr):
-        try:
-            l = self.mailingListManager.get_listFromMailto(emailAddr)
-        except AttributeError, ae:
-            retval = None
-        else:
-            retval = l.getId()
-        return retval
-
-    def get_site_id(self, emailAddr):
-        try:
-            l = self.mailingListManager.get_listFromMailto(emailAddr)
-        except AttributeError, ae:
-            retval = None
-        else:
-            retval = l.getProperty('siteId')
-        return retval
+        ListInfoForm.__init__(self, context, request)
 
     @form.action(label=u'Check', failure='handle_check_action_failure')
     def handle_check(self, action, data):
         emailAddr = data['email']
         d = {
             'email':   emailAddr, 
-            'groupId': self.get_group_id(emailAddr),
             'siteId':  self.get_site_id(emailAddr),
+            'groupId': self.get_group_id(emailAddr),
             }
         self.status = u'Done'
         retval = json.dumps(d)
