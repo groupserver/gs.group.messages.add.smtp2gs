@@ -8,4 +8,10 @@
     class=".groupexists.GroupExists"
     permission="zope2.View"/>
 
+  <browser:page 
+    for="Products.GSContent.interfaces.IGSSiteFolder"
+    name="gs-group-messages-add-email.html"
+    class=".addemail.AddEmail"
+    permission="zope2.View"/>
+
 </configure>
