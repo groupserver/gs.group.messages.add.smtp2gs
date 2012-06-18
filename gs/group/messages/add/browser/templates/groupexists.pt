@@ -15,7 +15,7 @@
       <form id="gs-group-messages-add-group-exists-form" 
         enctype="multipart/form-data"  method="post" action="."
         tal:attributes="action request/URL" >
-        <h1 tal:content="view/label">Subscribe</h1>
+        <h1 tal:content="view/label">Exists</h1>
         <tal:block define="widgets view/widgets">
           <tal:block replace="structure provider:groupserver.FormWidgets"/>
         </tal:block>

@@ -1,6 +1,5 @@
 # coding=utf-8
 import json
-from operator import or_
 from zope.component import createObject
 from zope.cachedescriptors.property import Lazy
 from zope.formlib import form
