@@ -32,6 +32,7 @@ setup(name='gs.group.messages.add',
     zip_safe=True,
     install_requires=[
         'setuptools',
+        'gs.auth.token',
         # -*- Extra requirements: -*-
     ],
     entry_points="""
