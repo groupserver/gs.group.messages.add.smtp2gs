@@ -17,13 +17,22 @@ class GroupExists(ListInfoForm):
     def __init__(self, context, request):
         ListInfoForm.__init__(self, context, request)
 
+    def get_url_for_site(self, siteId):
+        retval = None
+        if siteId:
+            s = getattr(self.context.Content, siteId)
+            retval = createObject('groupserver.SiteInfo', s).url
+        return retval
+
     @form.action(label=u'Check', failure='handle_check_action_failure')
     def handle_check(self, action, data):
         emailAddr = data['email']
+        siteId = self.get_site_id(emailAddr)
         d = {
             'email':   emailAddr, 
-            'siteId':  self.get_site_id(emailAddr),
+            'siteId':  siteId,
             'groupId': self.get_group_id(emailAddr),
+            'siteURL': self.get_url_for_site(siteId),
             }
         self.status = u'Done'
         retval = json.dumps(d)
