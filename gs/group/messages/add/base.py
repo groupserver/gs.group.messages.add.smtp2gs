@@ -17,8 +17,12 @@ class ListInfoForm(SiteForm):
     def get_siteId_groupId_for_email(self, emailAddr):
         # TODO: making a nice big cache would be great
         if emailAddr not in self.map:
-            l = self.mailingListManager.get_listFromMailto(emailAddr)
-            self.map[emailAddr] = (l.getProperty('siteId'), l.getId())
+            try:
+                l = self.mailingListManager.get_listFromMailto(emailAddr)
+            except AttributeError, ae:
+                self.map[emailAddr] = (None, None)
+            else:
+                self.map[emailAddr] = (l.getProperty('siteId'), l.getId())
         retval = self.map[emailAddr]
         assert len(retval) == 2
         return retval
