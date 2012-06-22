@@ -33,7 +33,7 @@ setup(name='gs.group.messages.add',
     install_requires=[
         'setuptools',
         'gs.auth.token',
-        'Products.XWFMailingList', # For the mailing list
+        'Products.XWFMailingListManager', # For the mailing list
         # -*- Extra requirements: -*-
     ],
     entry_points="""
