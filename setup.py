@@ -37,7 +37,10 @@ setup(name='gs.group.messages.add',
         'Products.XWFMailingListManager', # For the mailing list
         # -*- Extra requirements: -*-
     ],
-    entry_points="""
-    # -*- Entry points: -*-
-    """,)
+    entry_points={
+        'console_scripts': [
+            'smtp2gs = gs.group.messages.add.smtp2gs:main',
+            ],
 
+    },
+)
