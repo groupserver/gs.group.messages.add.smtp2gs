@@ -32,6 +32,7 @@ setup(name='gs.group.messages.add',
     zip_safe=True,
     install_requires=[
         'setuptools',
+        'lockfile',
         'gs.auth.token',
         'Products.XWFMailingListManager', # For the mailing list
         # -*- Extra requirements: -*-
