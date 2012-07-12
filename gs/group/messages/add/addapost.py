@@ -9,7 +9,7 @@ from zope.component import createObject, getMultiAdapter
 from zExceptions import BadRequest
 from gs.group.member.canpost.interfaces import IGSPostingUser
 from gs.profile.notify.adressee import Addressee
-from Products.XWFMailingListManager.queries import MessageQuery
+from adder import Adder
 
 from logging import getLogger
 log = getLogger('addapost')
@@ -70,6 +70,7 @@ def add_a_post(groupId, siteId, replyToId, topic, message,
     #audit = WebPostAuditor(groupObj)
     #audit.info(POST, topic)
     # Step 1, check if the user can post
+    # TODO: Move this up and out
     userPostingInfo = getMultiAdapter((groupObj, userInfo), 
                                        IGSPostingUser)
     if not userPostingInfo.canPost:
@@ -161,8 +162,8 @@ def add_a_post(groupId, siteId, replyToId, topic, message,
             # Send the message directly to the mailing list because
             #   it is not moderated
             try:
-                request = {'Mail': msg.as_string()}
-                r = groupList.manage_listboxer(request)
+                adder = Adder(context, request, siteId, groupId)
+                r = adder.add(msg.as_string())
                 result['message'] = \
                   u'<a href="/r/topic/%s#post-%s">Message '\
                   u'posted.</a>' % (r, r)
@@ -190,4 +191,3 @@ def add_a_post(groupId, siteId, replyToId, topic, message,
                 result['message'] = errorM
                 break
     return result
-
