@@ -55,11 +55,15 @@ group::
   
   Adder(context, request, siteId, groupId)
 
-Multiple messages can be added with a single instance. The ``request`` is
-needed because of `a hack`_.
+(The ``request`` is needed because of `a hack`_.) Multiple messages can be
+added with a single Adder instance by calling the `add`_ method.
+
+``add``
+~~~~~~~
 
 The ``Adder.add`` method takes a message as a single argument, and adds the
-message to the list.
+message to the list. It returns the identifier of the post that has just
+been added.
 
 A Hack
 ~~~~~~
@@ -74,6 +78,58 @@ What *should* happen is the job of sending the notification should be moved
 from the mailing list. Instead, the list should throw an exception if the
 user cannot post, and the *form* should catch it and send out the
 notification.
+
+``add_a_post``
+--------------
+
+The utility function ``gs.group.messages.add.add_a_post`` adds a post to a
+group.
+
+Synopsis
+~~~~~~~~
+
+::
+
+   add_a_post(groupId, siteId, replyToId, topic, message, tags, email, 
+              uploadedFiles, context, request)
+
+Arguments
+~~~~~~~~~
+
+``groupId``:
+  The ID of the group to add the post to.
+
+``siteId``:
+  The ID of the site to add the post to.
+
+``replyToId``:
+  The ID of the post that the person is replying to. It may be none.
+
+``topic``:
+  The topic (subject) to add the post to.
+
+``message``:
+  The message to add to the topic.
+
+``tags``:
+  Deprecated.
+
+``email``:
+  The ``From`` email address.
+
+``uploadedFiles``:
+  A list of files (attachments) that have been added to the post.
+
+``context``:
+  The context.
+
+``request``:
+  A request.
+
+Returns
+~~~~~~~
+
+The ID of the post that has been added.
 
 .. [#entryPoint] See `Feature 3539 <https://redmine.iopen.net/issues/3539>`_
 .. [#exists] See `Feature 3537 <https://redmine.iopen.net/issues/3537>`_
