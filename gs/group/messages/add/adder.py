@@ -27,4 +27,7 @@ class Adder(object):
         # TODO: audit
         r = self.request.clone()
         r.form[MAIL_PARAMETER_NAME] = message
-        self.list.manage_mailboxer(r)
+        retval = self.list.manage_mailboxer(r)
+        assert retval
+        assert type(retval) in (unicode, str)
+        return retval
