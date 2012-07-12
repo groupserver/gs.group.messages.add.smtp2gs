@@ -1,10 +1,59 @@
 # coding=utf-8
 from argparse import ArgumentParser, FileType, Action
 from lockfile import FileLock, LockTimeout
+from os import utime
+from os.path import getmtime
 import sys
+from time import time
+
+LOCK_FILE_NAME   = '/tmp/gs-group-messages-add-smtp2gs.lock'
+MAX_LOCK_TIMEOUT =   5 # seconds
+BREAK_LOCK_AGE   = 300 # seconds == 5 minutes
 
 def add_post_to_groupserver(url, emailMessage):
-    pass
+    create_file(LOCK_FILE_NAME)
+    # The following is a modification of the example from the lockfile
+    # documentation <http://packages.python.org/lockfile/lockfile.html>
+    #
+    # The reason this locking is here is that it is more than possible for
+    # Postfix to consume every single thread on the sever. By adding a
+    # lock, with a short timeout, we slow down the consumption of threads
+    # by the asynchronous email UI; this prevents the Web UI (which needs
+    # to be responsive) from locking up.
+    #
+    # We break the lock if the lock is very old because it is more than
+    # possible for something to crash, and to leave the lock taken. (It
+    # does assume that no email will take more than BREAK_LOCK_AGE to
+    # process.)
+    #
+    # If the file is still locked, after we wait for something to finish
+    # and check that the lock is not too old, then we exit. Postfix will
+    # try running the script with the same arguments again later.
+    lock = FileLock(LOCK_FILE_NAME)
+    while not lock.i_am_locking():
+        try:
+            lock.acquire(timeout=MAX_LOCK_TIMEOUT)
+        except LockTimeout:
+            if age(LOCK_FILE_NAME) > BREAK_LOCK_AGE:
+                lock.break_lock()
+            else:
+                sys.exit(20) # Postfix will try again later
+        touch(LOCK_FILE_NAME)
+        lock.acquire()
+
+def create_file(fileName):
+    f = file(fileName, 'w')
+    f.close()
+
+def age(fileName):
+    mTime = getmtime(fileName)
+    retval = time() - mTime
+    assert retval >= 0
+    return retval
+
+def touch(fileName):
+    now = time()
+    utime(fileName, (now, now))
 
 def MiB_to_B(mb):
     retval = mb * (2**20)
@@ -45,6 +94,6 @@ def main():
         sys.exit(11)
 
     add_post_to_groupserver(args.url, emailMessage)
-
+    sys.exit(0)
 if __name__ == '__main__':
     main()
