@@ -45,4 +45,3 @@ class GroupExists(ListInfoForm):
         else:
             self.status = u'<p>There are errors:</p>'
         assert type(self.status) == unicode
-
