@@ -1,59 +1,30 @@
 # coding=utf-8
 from argparse import ArgumentParser, FileType, Action
-from lockfile import FileLock, LockTimeout
-from os import utime
-from os.path import getmtime
 import sys
-from time import time
+from locker import get_lock
 
-LOCK_FILE_NAME   = '/tmp/gs-group-messages-add-smtp2gs.lock'
-MAX_LOCK_TIMEOUT =   5 # seconds
-BREAK_LOCK_AGE   = 300 # seconds == 5 minutes
+exit_vals = {
+    'success':               0,
+    'input_file_empty':     10,
+    'input_file_too_large': 11,
+    'locked':               20,}
 
-def add_post_to_groupserver(url, emailMessage):
-    create_file(LOCK_FILE_NAME)
-    # The following is a modification of the example from the lockfile
-    # documentation <http://packages.python.org/lockfile/lockfile.html>
-    #
-    # The reason this locking is here is that it is more than possible for
-    # Postfix to consume every single thread on the sever. By adding a
-    # lock, with a short timeout, we slow down the consumption of threads
-    # by the asynchronous email UI; this prevents the Web UI (which needs
-    # to be responsive) from locking up.
-    #
-    # We break the lock if the lock is very old because it is more than
-    # possible for something to crash, and to leave the lock taken. (It
-    # does assume that no email will take more than BREAK_LOCK_AGE to
-    # process.)
-    #
-    # If the file is still locked, after we wait for something to finish
-    # and check that the lock is not too old, then we exit. Postfix will
-    # try running the script with the same arguments again later.
-    lock = FileLock(LOCK_FILE_NAME)
-    while not lock.i_am_locking():
-        try:
-            lock.acquire(timeout=MAX_LOCK_TIMEOUT)
-        except LockTimeout:
-            if age(LOCK_FILE_NAME) > BREAK_LOCK_AGE:
-                lock.break_lock()
-            else:
-                sys.exit(20) # Postfix will try again later
-        touch(LOCK_FILE_NAME)
-        lock.acquire()
+def add_post_to_groupserver(progName, url, emailMessage):
+    # Get lock or die!!
+    lock = get_lock()
+    if not lock.i_am_locking():
+        m = '%s: Not processing the email message of %d bytes as %s is '\
+            'locked.\n' % (progName, len(emailMessage), progName)
+        sys.stderr.write(m)
+        sys.exit(exit_vals['locked']) # Postfix will try again later
 
-def create_file(fileName):
-    f = file(fileName, 'w')
-    f.close()
+    ## vvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    ## vvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    lock.release() # Very important!
+    ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-def age(fileName):
-    mTime = getmtime(fileName)
-    retval = time() - mTime
-    assert retval >= 0
-    return retval
-
-def touch(fileName):
-    now = time()
-    utime(fileName, (now, now))
+    print 'Here!!'
 
 def MiB_to_B(mb):
     retval = mb * (2**20)
@@ -86,14 +57,14 @@ def main():
     if l == 0:
         m = '%s: The file containing the email was empty.\n' % p.prog
         sys.stderr.write(m)
-        sys.exit(10)
+        sys.exit(exit_vals['input_file_empty'])
     elif (MiB_to_B(args.maxSize) < l):
         m = '%s: Email message too large (%d bytes, rather than %d '\
             'bytes).\n' % (p.prog, len(emailMessage), MiB_to_B(args.maxSize))
         sys.stderr.write(m)
-        sys.exit(11)
+        sys.exit(exit_vals['input_file_too_large'])
 
-    add_post_to_groupserver(args.url, emailMessage)
+    add_post_to_groupserver(p.prog, args.url, emailMessage)
     sys.exit(0)
 if __name__ == '__main__':
     main()
