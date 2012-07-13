@@ -9,8 +9,7 @@ an entry point [#entryPoint]_.
 ===========
 
 Usually a SMTP server (such as Postfix) will call ``smtp2gs`` to add an
-email message to a GroupServer group. It uses the pages provided by this
-module to `check if a group exists`_, and to `add an email`_ to a group.
+email message to a GroupServer group. 
 
 Usage
 -----
