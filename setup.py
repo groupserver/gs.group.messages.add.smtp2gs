@@ -38,7 +38,7 @@ setup(name='gs.group.messages.add.smtp2gs',
     ],
     entry_points={
         'console_scripts': [
-            'smtp2gs = gs.group.messages.add.smtp2gs:main',
+            'smtp2gs = gs.group.messages.add.smtp2gs.script:main',
             ],
 
     },
