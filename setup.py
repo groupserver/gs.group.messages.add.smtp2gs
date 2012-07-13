@@ -40,6 +40,8 @@ setup(name='gs.group.messages.add.smtp2gs',
         'console_scripts': [
             'smtp2gs = gs.group.messages.add.smtp2gs.script:main',
             ],
-
-    },
+        # --=mpj17=-- Entry points are the work of the devil. Some time
+        # you, me and Mr Soldering Iron are going to have a little chat
+        # about how to do things better.
+        },
 )
