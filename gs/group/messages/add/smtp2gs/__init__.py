@@ -1,2 +1,2 @@
 # coding=utf-8
-from addapost import add_a_post
+# This space intentionally left blank
