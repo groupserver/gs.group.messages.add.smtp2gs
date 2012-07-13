@@ -1,13 +1,20 @@
 # coding=utf-8
+# Standard modules
 from argparse import ArgumentParser, FileType, Action
+from httplib import HTTPConnection
 import sys
+from urlparse import urlparse
+# Local modules
 from locker import get_lock
 
 exit_vals = {
     'success':               0,
     'input_file_empty':     10,
     'input_file_too_large': 11,
-    'locked':               20,}
+    'url_bung':             20,
+    'locked':               30,}
+
+HTTP_TIMEOUT = 8 # seconds
 
 def add_post_to_groupserver(progName, url, emailMessage):
     # Get lock or die!!
@@ -18,20 +25,22 @@ def add_post_to_groupserver(progName, url, emailMessage):
         sys.stderr.write(m)
         sys.exit(exit_vals['locked']) # Postfix will try again later
 
-    ## vvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    parsedUrl = urlparse(url)
+    connection = HTTPConnection(parsedUrl.hostname, parsedUrl.port or 80, 
+                                strict=True, timeout=HTTP_TIMEOUT)
+
+    ## VVVVVVVVVVVVVVVVVVVVVVVVVVVVV
     ## vvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     lock.release() # Very important!
     ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    print 'Here!!'
+    ## AAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 
 def MiB_to_B(mb):
     retval = mb * (2**20)
     assert retval > mb
     return retval
 
-def main():
+def main(configFileName):
     p = ArgumentParser(description='Add an email message to GroupServer.',
                        epilog='Usually %(prog)s is called by a SMTP server '\
                            '(such as Postfix) in order to add an email '\
@@ -63,6 +72,12 @@ def main():
             'bytes).\n' % (p.prog, len(emailMessage), MiB_to_B(args.maxSize))
         sys.stderr.write(m)
         sys.exit(exit_vals['input_file_too_large'])
+
+    url = urlparse(args.url)
+    if not url.hostname:
+        m = '%s: No host in the URL <%s>\n' % (p.prog, args.url)
+        sys.stderr.write(m)
+        sys.exit(exit_vals['url_bung'])
 
     add_post_to_groupserver(p.prog, args.url, emailMessage)
     sys.exit(0)
