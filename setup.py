@@ -34,6 +34,7 @@ setup(name='gs.group.messages.add.smtp2gs',
     install_requires=[
         'setuptools',
         'lockfile',
+        'gs.form',
         # -*- Extra requirements: -*-
     ],
     entry_points={
