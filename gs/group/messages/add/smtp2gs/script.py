@@ -1,20 +1,29 @@
 # coding=utf-8
 # Standard modules
 from argparse import ArgumentParser, FileType, Action
-from httplib import HTTPConnection
+from email import message_from_string
+from httplib import OK as HTTP_OK
+from json import loads as json_loads
+from socket import gaierror
 import sys
 from urlparse import urlparse
+# GS Modules
+from gs.form import post_multipart
 # Local modules
 from locker import get_lock
 
 exit_vals = {
-    'success':               0,
-    'input_file_empty':     10,
-    'input_file_too_large': 11,
-    'url_bung':             20,
-    'locked':               30,}
+    'success':                0,
+    'input_file_empty':      10,
+    'input_file_too_large':  11,
+    'url_bung':              20,
+    'communication_failure': 21,
+    'socket_error':          22,
+    'locked':                30,
+    'no_x_original_to':      40}
 
 HTTP_TIMEOUT = 8 # seconds
+GROUP_EXISTS_URI = '/gs-group-messages-add-group-exists.html'
 
 def add_post_to_groupserver(progName, url, emailMessage):
     # Get lock or die!!
@@ -25,15 +34,40 @@ def add_post_to_groupserver(progName, url, emailMessage):
         sys.stderr.write(m)
         sys.exit(exit_vals['locked']) # Postfix will try again later
 
+    email = message_from_string(emailMessage)
     parsedUrl = urlparse(url)
-    connection = HTTPConnection(parsedUrl.hostname, parsedUrl.port or 80, 
-                                strict=True, timeout=HTTP_TIMEOUT)
 
-    ## VVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-    ## vvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    # First, figure out if the group exists.
+    xOriginalTo = email['x-original-to']
+    if xOriginalTo == None:
+        m = '%s: No "x-original-to" header in the email message.\n' % (progName)
+        sys.stderr.write(m)
+        sys.exit(exit_vals['no_x_original_to'])
+    fields = {'form.email': xOriginalTo, 'form.token': 'foo'}
+    try:
+        status, reason, data = post_multipart(parsedUrl.hostname, 
+                                              GROUP_EXISTS_URI, fields) # port?
+    except gaierror, g:
+        m = '%s: Error connecting to <%s>:\n%s:    %s\n' % \
+            (progName, url, progName, g)
+        sys.stderr.write(m)
+        sys.exit(exit_vals['socket_error'])
+        
+    if status != HTTP_OK:
+        m = '%s: Issue communicating with the server: %s (%d)\n' \
+            % (progName, reason, status)
+        sys.stderr.write(m)
+        sys.exit(exit_vals['communication_failure'])
+
+    print 'Here'
+    groupInfo = json_loads(r.read())
+    print groupInfo
+
+    ## VVVVVVVVVVVVVVVVVVVVVVVVVV ##
+    ## vvvvvvvvvvvvvvvvvvvvvvvvvv ##
     lock.release() # Very important!
-    ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ## AAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    ## ^^^^^^^^^^^^^^^^^^^^^^^^^^ ##
+    ## AAAAAAAAAAAAAAAAAAAAAAAAAA ##
 
 def MiB_to_B(mb):
     retval = mb * (2**20)
