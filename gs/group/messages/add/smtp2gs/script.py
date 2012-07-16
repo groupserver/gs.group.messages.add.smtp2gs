@@ -2,15 +2,12 @@
 # Standard modules
 from argparse import ArgumentParser, FileType, Action
 from email import message_from_string
-from httplib import OK as HTTP_OK
-from json import loads as json_loads
 from socket import gaierror
 import sys
 from urlparse import urlparse
-# GS Modules
-from gs.form import post_multipart
 # Local modules
 from locker import get_lock
+from groupinfo import get_group_info_from_address, NotOk
 
 exit_vals = {
     'success':                0,
@@ -20,10 +17,10 @@ exit_vals = {
     'communication_failure': 21,
     'socket_error':          22,
     'locked':                30,
-    'no_x_original_to':      40}
+    'no_x_original_to':      40,
+    'json_decode_error':     50,}
 
 HTTP_TIMEOUT = 8 # seconds
-GROUP_EXISTS_URI = '/gs-group-messages-add-group-exists.html'
 
 def add_post_to_groupserver(progName, url, emailMessage):
     # Get lock or die!!
@@ -43,24 +40,25 @@ def add_post_to_groupserver(progName, url, emailMessage):
         m = '%s: No "x-original-to" header in the email message.\n' % (progName)
         sys.stderr.write(m)
         sys.exit(exit_vals['no_x_original_to'])
-    fields = {'form.email': xOriginalTo, 'form.token': 'foo'}
+
     try:
-        status, reason, data = post_multipart(parsedUrl.hostname, 
-                                              GROUP_EXISTS_URI, fields) # port?
+        groupInfo = get_group_info_from_address(parsedUrl.hostname, xOriginalTo)
     except gaierror, g:
         m = '%s: Error connecting to <%s>:\n%s:    %s\n' % \
             (progName, url, progName, g)
         sys.stderr.write(m)
         sys.exit(exit_vals['socket_error'])
-        
-    if status != HTTP_OK:
-        m = '%s: Issue communicating with the server: %s (%d)\n' \
-            % (progName, reason, status)
+    except NotOk, ne:
+        m = '%s: Issue communicating with the server: %s \n' \
+            % (progName, ne)
         sys.stderr.write(m)
         sys.exit(exit_vals['communication_failure'])
+    except ValueError, ve:
+        m = '%s: Could not decode the data returned by the server.\n' \
+            % (progName)
+        sys.stderr.write(m)
+        sys.exit(exit_vals['json_decode_error'])
 
-    print 'Here'
-    groupInfo = json_loads(r.read())
     print groupInfo
 
     ## VVVVVVVVVVVVVVVVVVVVVVVVVV ##
