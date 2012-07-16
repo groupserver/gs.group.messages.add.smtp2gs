@@ -21,7 +21,7 @@ exit_vals = {
     'json_decode_error':     50,}
 
 def add_post_to_groupserver(progName, url, emailMessage):
-    # Get lock or die!!
+    # First, get the lock or die!!
     lock = get_lock()
     if not lock.i_am_locking():
         m = '%s: Not processing the email message of %d bytes as %s is '\
@@ -32,13 +32,14 @@ def add_post_to_groupserver(progName, url, emailMessage):
     email = message_from_string(emailMessage)
     parsedUrl = urlparse(url)
 
-    # First, figure out if the group exists.
+    # Next, figure out if the group exists.
     xOriginalTo = email['x-original-to']
     if xOriginalTo == None:
         m = '%s: No "x-original-to" header in the email message.\n' % (progName)
         sys.stderr.write(m)
         sys.exit(exit_vals['no_x_original_to'])
 
+    # Get the information about the group
     try:
         groupInfo = get_group_info_from_address(parsedUrl.hostname, xOriginalTo)
     except gaierror, g:
@@ -57,6 +58,7 @@ def add_post_to_groupserver(progName, url, emailMessage):
         sys.stderr.write(m)
         sys.exit(exit_vals['json_decode_error'])
 
+    # Finally, add the email to the group.
     try:
         add_post(parsedUrl.hostname, emailMessage)
     except gaierror, g:
