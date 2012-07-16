@@ -22,9 +22,9 @@ def get_group_info_from_address(hostname, address):
     return retval
 
 ADD_POST_URI = '/gs-group-messages-add-email.html'
-def add_post(hostname, emailMessage):
-    fields = {'form.emailMessage': emailMessage, 'form.token': 'foo',
-              'form.actions.add': 'Add'}
+def add_post(hostname, groupId, emailMessage):
+    fields = {'form.emailMessage': emailMessage, 'form.groupId': groupId,
+              'form.token': 'foo', 'form.actions.add': 'Add'}
     status, reason, data = post_multipart(hostname, ADD_POST_URI, 
                                           fields) # port?
     if status != HTTP_OK:

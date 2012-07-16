@@ -20,7 +20,7 @@ exit_vals = {
     'no_x_original_to':      40,
     'json_decode_error':     50,}
 
-def add_post_to_groupserver(progName, url, emailMessage):
+def add_post_to_groupserver(progName, url, listId, emailMessage):
     # First, get the lock or die!!
     lock = get_lock()
     if not lock.i_am_locking():
@@ -29,38 +29,49 @@ def add_post_to_groupserver(progName, url, emailMessage):
         sys.stderr.write(m)
         sys.exit(exit_vals['locked']) # Postfix will try again later
 
-    email = message_from_string(emailMessage)
     parsedUrl = urlparse(url)
+    if not parsedUrl.hostname:
+        m = '%s: No host in the URL <%s>\n' % (p.prog, args.url)
+        sys.stderr.write(m)
+        sys.exit(exit_vals['url_bung'])
 
-    # Next, figure out if the group exists.
-    xOriginalTo = email['x-original-to']
-    if xOriginalTo == None:
-        m = '%s: No "x-original-to" header in the email message.\n' % (progName)
-        sys.stderr.write(m)
-        sys.exit(exit_vals['no_x_original_to'])
-
-    # Get the information about the group
-    try:
-        groupInfo = get_group_info_from_address(parsedUrl.hostname, xOriginalTo)
-    except gaierror, g:
-        m = '%s: Error connecting to <%s> while looking up the group '\
-            'information:\n%s:    %s\n' %  (progName, url, progName, g)
-        sys.stderr.write(m)
-        sys.exit(exit_vals['socket_error'])
-    except NotOk, ne:
-        m = '%s: Issue communicating with the server while looking up the '\
-            'group information:\n%s    %s\n' % (progName, progName, ne)
-        sys.stderr.write(m)
-        sys.exit(exit_vals['communication_failure'])
-    except ValueError, ve:
-        m = '%s: Could not decode the data returned by the server while '\
-            'looking up the \n%s: group information.\n' (progName, progName)
-        sys.stderr.write(m)
-        sys.exit(exit_vals['json_decode_error'])
+    if listId:
+        groupToSendTo = listId
+    else:
+        # Figure out if the group exists.
+        email = message_from_string(emailMessage)
+        xOriginalTo = email['x-original-to']
+        if xOriginalTo == None:
+            m = '%s: No "x-original-to" header in the email message.\n' \
+                % (progName)
+            sys.stderr.write(m)
+            sys.exit(exit_vals['no_x_original_to'])
+            
+        # Get the information about the group
+        try:
+            groupInfo = get_group_info_from_address(parsedUrl.hostname, 
+                                                    xOriginalTo)
+        except gaierror, g:
+            m = '%s: Error connecting to <%s> while looking up the group '\
+                'information:\n%s:    %s\n' %  (progName, url, progName, g)
+            sys.stderr.write(m)
+            sys.exit(exit_vals['socket_error'])
+        except NotOk, ne:
+            m = '%s: Issue communicating with the server while looking up the '\
+                'group information:\n%s    %s\n' % (progName, progName, ne)
+            sys.stderr.write(m)
+            sys.exit(exit_vals['communication_failure'])
+        except ValueError, ve:
+            m = '%s: Could not decode the data returned by the server while '\
+                'looking up the \n%s: group information.\n' (progName, progName)
+            sys.stderr.write(m)
+            sys.exit(exit_vals['json_decode_error'])
+            
+        groupToSendTo = groupInfo['groupId']
 
     # Finally, add the email to the group.
     try:
-        add_post(parsedUrl.hostname, emailMessage)
+        add_post(parsedUrl.hostname, groupToSendTo, emailMessage)
     except gaierror, g:
         m = '%s: Error connecting to <%s> while adding the email message:\n'\
             '%s:    %s\n' %  (progName, url, progName, g)
@@ -93,7 +104,7 @@ def main(configFileName):
     p.add_argument('-m', '--max-size', dest='maxSize', type=int, default=200,
                    help='The maximum size of the post that will be accepted, '\
                        'in mebibytes (default %(default)sMiB).')
-    p.add_argument('-l', '--list', dest='listId',
+    p.add_argument('-l', '--list', dest='listId', default=None,
                    help='The list to send the message to. By default it is '\
                        'extracted from the x-original-to header.')
     p.add_argument('-f', '--file', dest='file', default='-', 
@@ -116,13 +127,7 @@ def main(configFileName):
         sys.stderr.write(m)
         sys.exit(exit_vals['input_file_too_large'])
 
-    url = urlparse(args.url)
-    if not url.hostname:
-        m = '%s: No host in the URL <%s>\n' % (p.prog, args.url)
-        sys.stderr.write(m)
-        sys.exit(exit_vals['url_bung'])
-
-    add_post_to_groupserver(p.prog, args.url, emailMessage)
+    add_post_to_groupserver(p.prog, args.url, args.listId, emailMessage)
     sys.exit(0)
 
 if __name__ == '__main__':
