@@ -3,6 +3,8 @@ from httplib import OK as HTTP_OK
 from json import loads as json_loads
 from gs.form import post_multipart
 
+HTTP_TIMEOUT = 8 # seconds
+
 class NotOk(Exception):
     pass
 
@@ -18,3 +20,11 @@ def get_group_info_from_address(hostname, address):
 
     retval = json_loads(data)
     return retval
+
+ADD_POST_URI = '/gs-group-messages-add-email.html'
+def add_post(hostname, emailMessage):
+    fields = {'form.emailMessage': emailMessage, 'form.token': 'foo',
+              'form.actions.add': 'Add'}
+    status, reason, data = post_multipart(hostname, P, fields) # port?
+    if status != HTTP_OK:
+        raise NotOk('%s (%d)' % (reason, status))

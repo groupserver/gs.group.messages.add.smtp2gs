@@ -7,7 +7,7 @@ import sys
 from urlparse import urlparse
 # Local modules
 from locker import get_lock
-from groupinfo import get_group_info_from_address, NotOk
+from servercomms import get_group_info_from_address, NotOk, add_post
 
 exit_vals = {
     'success':                0,
@@ -19,8 +19,6 @@ exit_vals = {
     'locked':                30,
     'no_x_original_to':      40,
     'json_decode_error':     50,}
-
-HTTP_TIMEOUT = 8 # seconds
 
 def add_post_to_groupserver(progName, url, emailMessage):
     # Get lock or die!!
@@ -44,23 +42,34 @@ def add_post_to_groupserver(progName, url, emailMessage):
     try:
         groupInfo = get_group_info_from_address(parsedUrl.hostname, xOriginalTo)
     except gaierror, g:
-        m = '%s: Error connecting to <%s>:\n%s:    %s\n' % \
-            (progName, url, progName, g)
+        m = '%s: Error connecting to <%s> while looking up the group '\
+            'information:\n%s:    %s\n' %  (progName, url, progName, g)
         sys.stderr.write(m)
         sys.exit(exit_vals['socket_error'])
     except NotOk, ne:
-        m = '%s: Issue communicating with the server: %s \n' \
-            % (progName, ne)
+        m = '%s: Issue communicating with the server while looking up the '\
+            'group information:\n%s    %s\n' % (progName, progName, ne)
         sys.stderr.write(m)
         sys.exit(exit_vals['communication_failure'])
     except ValueError, ve:
-        m = '%s: Could not decode the data returned by the server.\n' \
-            % (progName)
+        m = '%s: Could not decode the data returned by the server while '\
+            'looking up the \n%s: group information.\n' (progName, progName)
         sys.stderr.write(m)
         sys.exit(exit_vals['json_decode_error'])
 
-    print groupInfo
-
+    try:
+        add_post(parsedUrl.hostname, emailMessage)
+    except gaierror, g:
+        m = '%s: Error connecting to <%s> while adding the email message:\n'\
+            '%s:    %s\n' %  (progName, url, progName, g)
+        sys.stderr.write(m)
+        sys.exit(exit_vals['socket_error'])
+    except NotOk, ne:
+        m = '%s: Issue communicating with the server while adding the email '\
+            'message:\n%s    %s\n' % (progName, progName, ne)
+        sys.stderr.write(m)
+        sys.exit(exit_vals['communication_failure'])
+    
     ## VVVVVVVVVVVVVVVVVVVVVVVVVV ##
     ## vvvvvvvvvvvvvvvvvvvvvvvvvv ##
     lock.release() # Very important!
@@ -113,5 +122,6 @@ def main(configFileName):
 
     add_post_to_groupserver(p.prog, args.url, emailMessage)
     sys.exit(0)
+
 if __name__ == '__main__':
     main()
