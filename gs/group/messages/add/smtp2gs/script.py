@@ -5,6 +5,8 @@ from email import message_from_string
 from socket import gaierror
 import sys
 from urlparse import urlparse
+# GroupServer modules
+from gs.config.config import Config, ConfigError
 # Local modules
 from locker import get_lock
 from servercomms import get_group_info_from_address, NotOk, add_post
@@ -13,6 +15,7 @@ exit_vals = {
     'success':                0,
     'input_file_empty':      10,
     'input_file_too_large':  11,
+    'config_error':          15,
     'url_bung':              20,
     'communication_failure': 21,
     'socket_error':          22,
@@ -94,6 +97,16 @@ def MiB_to_B(mb):
     assert retval > mb
     return retval
 
+def get_token_from_config(configSet, configFileName):
+    config = Config(configSet, configFileName)
+    config.set_schema('webservice', {'token': str})
+    ws = config.get('webservice')
+    retval = ws['token']
+    if not retval:
+        m = 'The token was not set.'
+        raise ValueError(m)
+    return retval
+
 def main(configFileName):
     p = ArgumentParser(description='Add an email message to GroupServer.',
                        epilog='Usually %(prog)s is called by a SMTP server '\
@@ -111,9 +124,28 @@ def main(configFileName):
                    type=FileType('r'),
                    help='The name of the file that contains the message. If '\
                        'omitted (or "%(default)s") standard-input will be '\
-                       'read.') 
+                       'read.')
+    p.add_argument('-c', '--config', dest='config', default=configFileName,
+                   type=str,
+                   help='The name of the GroupServer configuration file '\
+                       '(default "%(default)s") that contains the token that '\
+                       'will be used to authenticate the script when it tries '\
+                       'to add the email to the site.')
+    p.add_argument('-i','--instance', dest='instance', default='default',
+                   type=str,
+                   help = 'The identifier of the GroupServer instance '\
+                       'configuration to use (default "%(default)s").')
     args = p.parse_args()
     
+    try:
+        token = get_token_from_config(args.instance, args.config)
+    except ConfigError, ce:
+        m = '%s: Configuration error for the file "%s":\n' \
+            '%s: %s\n' % (p.prog, args.config, p.prog, ce.message)
+        sys.stderr.write(m)
+        sys.exit(exit_vals['config_error'])
+    print 'Should use %s as the token' % token
+
     emailMessage = args.file.read()
     args.file.close()
     l = len(emailMessage)
@@ -131,4 +163,4 @@ def main(configFileName):
     sys.exit(0)
 
 if __name__ == '__main__':
-    main()
+    main('etc/gsconfig.ini')
