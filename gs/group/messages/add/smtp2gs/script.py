@@ -23,7 +23,7 @@ exit_vals = {
     'no_x_original_to':      40,
     'json_decode_error':     50,}
 
-def add_post_to_groupserver(progName, url, listId, emailMessage):
+def add_post_to_groupserver(progName, url, listId, emailMessage, token):
     # First, get the lock or die!!
     lock = get_lock()
     if not lock.i_am_locking():
@@ -52,8 +52,8 @@ def add_post_to_groupserver(progName, url, listId, emailMessage):
             
         # Get the information about the group
         try:
-            groupInfo = get_group_info_from_address(parsedUrl.hostname, 
-                                                    xOriginalTo)
+            groupInfo = get_group_info_from_address(parsedUrl.hostname,
+                                                    xOriginalTo, token)
         except gaierror, g:
             m = '%s: Error connecting to <%s> while looking up the group '\
                 'information:\n%s:    %s\n' %  (progName, url, progName, g)
@@ -74,7 +74,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage):
 
     # Finally, add the email to the group.
     try:
-        add_post(parsedUrl.hostname, groupToSendTo, emailMessage)
+        add_post(parsedUrl.hostname, groupToSendTo, emailMessage, token)
     except gaierror, g:
         m = '%s: Error connecting to <%s> while adding the email message:\n'\
             '%s:    %s\n' %  (progName, url, progName, g)
@@ -144,7 +144,6 @@ def main(configFileName):
             '%s: %s\n' % (p.prog, args.config, p.prog, ce.message)
         sys.stderr.write(m)
         sys.exit(exit_vals['config_error'])
-    print 'Should use %s as the token' % token
 
     emailMessage = args.file.read()
     args.file.close()
@@ -159,7 +158,7 @@ def main(configFileName):
         sys.stderr.write(m)
         sys.exit(exit_vals['input_file_too_large'])
 
-    add_post_to_groupserver(p.prog, args.url, args.listId, emailMessage)
+    add_post_to_groupserver(p.prog, args.url, args.listId, emailMessage, token)
     sys.exit(0)
 
 if __name__ == '__main__':

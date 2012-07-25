@@ -10,8 +10,8 @@ class NotOk(Exception):
 
 GROUP_EXISTS_URI = '/gs-group-messages-add-group-exists.html'
 
-def get_group_info_from_address(hostname, address):
-    fields = {'form.email': address, 'form.token': 'foo',
+def get_group_info_from_address(hostname, address, token):
+    fields = {'form.email': address, 'form.token': token,
               'form.actions.check': 'Check'}
     status, reason, data = post_multipart(hostname, GROUP_EXISTS_URI, 
                                           fields) # port?
@@ -22,9 +22,9 @@ def get_group_info_from_address(hostname, address):
     return retval
 
 ADD_POST_URI = '/gs-group-messages-add-email.html'
-def add_post(hostname, groupId, emailMessage):
+def add_post(hostname, groupId, emailMessage, token):
     fields = {'form.emailMessage': emailMessage, 'form.groupId': groupId,
-              'form.token': 'foo', 'form.actions.add': 'Add'}
+              'form.token': token, 'form.actions.add': 'Add'}
     status, reason, data = post_multipart(hostname, ADD_POST_URI, 
                                           fields) # port?
     if status != HTTP_OK:

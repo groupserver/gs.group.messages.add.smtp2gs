@@ -42,6 +42,28 @@ Optional Arguments
   The name of the file that contains the message. If omitted (or "-") 
   standard-input will be read.
 
+Examples
+~~~~~~~~
+
+Adding a post to a group in the general case, where the email is read of
+standard input::
+
+  smtp2gs http://url.of.your.site
+
+Over-riding the ``x-original-to`` header. This allows posts to an old email
+address to be sent to a new group.::
+
+  smtp2gs --list newGroupId http://url.of.your.site
+
+Testing, by reading a file from ``/tmp``::
+
+  smtp2gs --file /tmp/test.mbox http://url.of.your.site
+
+Setting the maximum size of messages posted to a group to 1MiB::
+
+  smtp2gs --max-size 1 http://url.of.your.site
+
+
 Configuration File
 ==================
 
