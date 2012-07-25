@@ -60,11 +60,38 @@ Returns
 The script returns ``0`` on success, an non-zero on an error. In the case
 of an error, ``smtp2gs`` follows the convention specified in
 ``/usr/include/sysexits.h``. In addition the error message that is written
-to ``stderr`` starts with the enhanced mail system status code [#rfc3463]_. 
+to ``stderr`` starts with the enhanced mail system status code
+[#rfc3463]_. These include `transient errors`_ and `permanent errors`_.
+
+Transient Errors
+~~~~~~~~~~~~~~~~
 
 Any errors that can be solved by changing the configuration (either of
 Postfix or the `configuration file`_) are marked as *transient* (with a
-``4.x.x`` status code). The five *permanent* errors are listed below.
+``4.x.x`` status code). 
+
+======  ===================================  ==================================
+ Code    Note                                 Fix
+======  ===================================  ==================================
+ 4.3.5   Error with the configuration file.   Correct the configuration file.
+ 4.4.4   Error connecting to URL.             Check that the server is running, 
+                                              or alter the URL that is used to 
+                                              call ``smtp2gs``.
+ 4.4.5   The system is too busy.              Wait.
+ 4.5.0   Could not decode the data            *Usually* this is caused by an
+         returned by the server.              invalid token in the 
+                                              `configuration file`_.
+                                              Fix the token in the file.
+ 4.5.2   No host in the URL.                  Alter the URL that is used in 
+                                              the call to ``smtp2gs`` so it has
+                                              a host-name.
+======  ===================================  ==================================
+
+
+Permanent Errors
+~~~~~~~~~~~~~~~~
+
+The five *permanent* errors are listed below.
 
 ======  ======================================================================
  Code    Note
