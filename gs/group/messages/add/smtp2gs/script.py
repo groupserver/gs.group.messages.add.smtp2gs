@@ -66,7 +66,8 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
             sys.exit(exit_vals['communication_failure'])
         except ValueError, ve:
             m = '%s: Could not decode the data returned by the server while '\
-                'looking up the \n%s: group information.\n' (progName, progName)
+                'looking up the \n%s: group information. Check the token.\n' %\
+                (progName, progName)
             sys.stderr.write(m)
             sys.exit(exit_vals['json_decode_error'])
             
