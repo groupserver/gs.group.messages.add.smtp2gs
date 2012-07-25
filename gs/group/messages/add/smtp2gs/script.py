@@ -72,7 +72,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
             sys.exit(exit_vals['json_decode_error'])
             
         groupToSendTo = groupInfo['groupId']
-
+    assert groupToSendTo, 'There is no group to send the email message to.'
     # Finally, add the email to the group.
     try:
         add_post(parsedUrl.hostname, groupToSendTo, emailMessage, token)
