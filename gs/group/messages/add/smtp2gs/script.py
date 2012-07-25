@@ -35,14 +35,6 @@ exit_vals = {
 # The error-messages that are written to STDERR conform to RFC 3463
 # <http://tools.ietf.org/html/rfc3463>. If a problem can be changed with an
 # alteration to the configuration then a 4.x.x error will be returned.
-# Permanent Errors:
-# 5.1.3 No "x-original-to" header in the email message.
-# 5.5.0 Error communicating with the server while looking up the group '
-#       information
-# 5.1.1 There is no such group to send the message to.
-# 5.5.0 Issue communicating with the server while adding the message
-# 5.3.0 The file containing the email was empty.
-# 5.3.4 Email message too large
 
 def add_post_to_groupserver(progName, url, listId, emailMessage, token):
     # First, get the lock or die!!
