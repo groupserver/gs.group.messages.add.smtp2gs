@@ -27,23 +27,34 @@ exit_vals = {
     'url_bung':              EX_USAGE,
     'communication_failure': EX_PROTOCOL,
     'socket_error':          EX_PROTOCOL,
-    'locked':                EX_TEMPFAIL,
+    'locked':                EX_TEMPFAIL, # Postfix will try again later
     'no_x_original_to':      EX_DATAERR,
     'json_decode_error':     EX_PROTOCOL,
     'no_group':              EX_NOUSER,}
+
+# The error-messages that are written to STDERR conform to RFC 3463
+# <http://tools.ietf.org/html/rfc3463>. If a problem can be changed with an
+# alteration to the configuration then a 4.x.x error will be returned.
+# Permanent Errors:
+# 5.1.3 No "x-original-to" header in the email message.
+# 5.5.0 Error communicating with the server while looking up the group '
+#       information
+# 5.1.1 There is no such group to send the message to.
+# 5.5.0 Issue communicating with the server while adding the message
+# 5.3.0 The file containing the email was empty.
+# 5.3.4 Email message too large
 
 def add_post_to_groupserver(progName, url, listId, emailMessage, token):
     # First, get the lock or die!!
     lock = get_lock()
     if not lock.i_am_locking():
-        m = '%s: Not processing the email message of %d bytes as %s is '\
-            'locked.\n' % (progName, len(emailMessage), progName)
+        m = '4.4.5 Not processing the message as the system is too busy.'
         sys.stderr.write(m)
-        sys.exit(exit_vals['locked']) # Postfix will try again later
+        sys.exit(exit_vals['locked'])
 
     parsedUrl = urlparse(url)
     if not parsedUrl.hostname:
-        m = '%s: No host in the URL <%s>\n' % (p.prog, args.url)
+        m = '4.5.2 No host in the URL <%s>\n' % (url)
         sys.stderr.write(m)
         sys.exit(exit_vals['url_bung'])
 
@@ -54,8 +65,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         email = message_from_string(emailMessage)
         xOriginalTo = email['x-original-to']
         if xOriginalTo == None:
-            m = '%s: No "x-original-to" header in the email message.\n' \
-                % (progName)
+            m = '5.1.3 No "x-original-to" header in the email message.\n' 
             sys.stderr.write(m)
             sys.exit(exit_vals['no_x_original_to'])
             
@@ -64,26 +74,25 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
             groupInfo = get_group_info_from_address(parsedUrl.hostname,
                                                     xOriginalTo, token)
         except gaierror, g:
-            m = '%s: Error connecting to <%s> while looking up the group '\
-                'information:\n%s:    %s\n' %  (progName, url, progName, g)
+            m = '4.4.4 Error connecting to <%s> while looking up the group '\
+                'information:\n%s\n' %  (url, g)
             sys.stderr.write(m)
             sys.exit(exit_vals['socket_error'])
         except NotOk, ne:
-            m = '%s: Issue communicating with the server while looking up the '\
-                'group information:\n%s    %s\n' % (progName, progName, ne)
+            m = '5.5.0 Error communicating with the server while looking up '\
+                'the group information:\n%s\n' % (ne)
             sys.stderr.write(m)
             sys.exit(exit_vals['communication_failure'])
         except ValueError, ve:
-            m = '%s: Could not decode the data returned by the server while '\
-                'looking up the \n%s: group information. Check the token.\n' %\
-                (progName, progName)
+            m = '4.5.0 Could not decode the data returned by the server while '\
+                'looking up the \ngroup information. Check the token.\n'
             sys.stderr.write(m)
             sys.exit(exit_vals['json_decode_error'])
             
         groupToSendTo = groupInfo['groupId']
 
     if not(groupToSendTo):
-        m = '%s: There is no group to send the email message to.' % progName
+        m = '5.1.1 There is no such group to send the message to.'
         sys.stderr.write(m)
         sys.exit(exit_vals['no_group'])
         
@@ -91,13 +100,13 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
     try:
         add_post(parsedUrl.hostname, groupToSendTo, emailMessage, token)
     except gaierror, g:
-        m = '%s: Error connecting to <%s> while adding the email message:\n'\
-            '%s:    %s\n' %  (progName, url, progName, g)
+        m = '4.4.4 Error connecting to <%s> while adding the message:\n%s\n' %\
+            (url, g)
         sys.stderr.write(m)
         sys.exit(exit_vals['socket_error'])
     except NotOk, ne:
-        m = '%s: Issue communicating with the server while adding the email '\
-            'message:\n%s    %s\n' % (progName, progName, ne)
+        m = '5.5.0 Issue communicating with the server while adding the '\
+            'message:\n    %s\n' % (ne)
         sys.stderr.write(m)
         sys.exit(exit_vals['communication_failure'])
     
@@ -155,8 +164,8 @@ def main(configFileName):
     try:
         token = get_token_from_config(args.instance, args.config)
     except ConfigError, ce:
-        m = '%s: Configuration error for the file "%s":\n' \
-            '%s: %s\n' % (p.prog, args.config, p.prog, ce.message)
+        m = '4.3.5: Error with the configuration file "%s":\n%s\n' %\
+            (args.config, ce.message)
         sys.stderr.write(m)
         sys.exit(exit_vals['config_error'])
 
@@ -164,17 +173,17 @@ def main(configFileName):
     args.file.close()
     l = len(emailMessage)
     if l == 0:
-        m = '%s: The file containing the email was empty.\n' % p.prog
+        m = '5.3.0 The file containing the email was empty.\n'
         sys.stderr.write(m)
         sys.exit(exit_vals['input_file_empty'])
     elif (MiB_to_B(args.maxSize) < l):
-        m = '%s: Email message too large (%d bytes, rather than %d '\
-            'bytes).\n' % (p.prog, len(emailMessage), MiB_to_B(args.maxSize))
+        m = '5.3.4 Email message too large (%d bytes, rather than %d '\
+            'bytes).\n' % (len(emailMessage), MiB_to_B(args.maxSize))
         sys.stderr.write(m)
         sys.exit(exit_vals['input_file_too_large'])
 
     add_post_to_groupserver(p.prog, args.url, args.listId, emailMessage, token)
     sys.exit(0)
-
+    
 if __name__ == '__main__':
     main('etc/gsconfig.ini')

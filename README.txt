@@ -54,6 +54,30 @@ Optional Arguments
   The identifier of the GroupServer instance configuration to use (default
   "default").
 
+Returns
+-------
+
+The script returns ``0`` on success, an non-zero on an error. In the case
+of an error, ``smtp2gs`` follows the convention specified in
+``/usr/include/sysexits.h``. In addition the error message that is written
+to ``stderr`` starts with the enhanced mail system status code [#rfc3463]_. 
+
+Any errors that can be solved by changing the configuration (either of
+Postfix or the `configuration file`_) are marked as *transient* (with a
+``4.x.x`` status code). The five *permanent* errors are listed below.
+
+======  ======================================================================
+ Code    Note
+======  ======================================================================
+ 5.1.1   There is no such group to send the message to.
+ 5.1.3   No "x-original-to" header in the email message.
+ 5.3.0   The file containing the email was empty.
+ 5.3.4   Email message too large.
+ 5.5.0   Error communicating with the server (either while looking up the
+         group information or adding the message).
+======  ======================================================================
+
+
 Examples
 ~~~~~~~~
 
@@ -154,6 +178,8 @@ URLs) that are supported by the same database::
   token = theValueOfTheDefaultToken
 
 .. [#entryPoint] See `Feature 3539 <https://redmine.iopen.net/issues/3539>`_
+.. [#rfc3463] `RFC 3463: Enhanced Mail System Status Codes 
+             <http://tools.ietf.org/html/rfc3463>`_
 .. [#add] See ``gs.group.messages.add.base`` 
             <https://source.iopen.net/groupserver/gs.group.messages.add.base/summary>
 .. [#form] See ``gs.form`` 
