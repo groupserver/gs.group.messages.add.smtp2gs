@@ -106,7 +106,7 @@ The five *permanent* errors are listed below.
 
 
 Examples
-~~~~~~~~
+--------
 
 Adding a post to a group in the general case, where the email is read of
 standard input::
