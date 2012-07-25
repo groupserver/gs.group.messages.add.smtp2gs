@@ -11,17 +11,26 @@ from gs.config.config import Config, ConfigError
 from locker import get_lock
 from servercomms import get_group_info_from_address, NotOk, add_post
 
+# See /usr/include/sysexits.h
+EX_OK       =  0
+EX_USAGE    = 64
+EX_DATAERR  = 65
+EX_NOUSER   = 67
+EX_PROTOCOL = 76
+EX_TEMPFAIL = 75
+EX_CONFIG   = 78
 exit_vals = {
-    'success':                0,
-    'input_file_empty':      10,
-    'input_file_too_large':  11,
-    'config_error':          15,
-    'url_bung':              20,
-    'communication_failure': 21,
-    'socket_error':          22,
-    'locked':                30,
-    'no_x_original_to':      40,
-    'json_decode_error':     50,}
+    'success':               EX_OK,
+    'input_file_empty':      EX_DATAERR,
+    'input_file_too_large':  EX_DATAERR,
+    'config_error':          EX_CONFIG,
+    'url_bung':              EX_USAGE,
+    'communication_failure': EX_PROTOCOL,
+    'socket_error':          EX_PROTOCOL,
+    'locked':                EX_TEMPFAIL,
+    'no_x_original_to':      EX_DATAERR,
+    'json_decode_error':     EX_PROTOCOL,
+    'no_group':              EX_NOUSER,}
 
 def add_post_to_groupserver(progName, url, listId, emailMessage, token):
     # First, get the lock or die!!
@@ -72,7 +81,12 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
             sys.exit(exit_vals['json_decode_error'])
             
         groupToSendTo = groupInfo['groupId']
-    assert groupToSendTo, 'There is no group to send the email message to.'
+
+    if not(groupToSendTo):
+        m = '%s: There is no group to send the email message to.' % progName
+        sys.stderr.write(m)
+        sys.exit(exit_vals['no_group'])
+        
     # Finally, add the email to the group.
     try:
         add_post(parsedUrl.hostname, groupToSendTo, emailMessage, token)
