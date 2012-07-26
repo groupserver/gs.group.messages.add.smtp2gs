@@ -84,7 +84,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         groupToSendTo = groupInfo['groupId']
 
     if not(groupToSendTo):
-        m = '5.1.1 There is no such group to send the message to.'
+        m = '5.1.1 There is no such group on this site.'
         sys.stderr.write(m)
         sys.exit(exit_vals['no_group'])
         
