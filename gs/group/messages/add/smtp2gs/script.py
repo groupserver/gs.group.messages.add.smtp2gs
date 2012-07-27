@@ -1,6 +1,7 @@
 # coding=utf-8
 # Standard modules
 from argparse import ArgumentParser, FileType, Action
+import atexit
 from email import message_from_string
 from socket import gaierror
 import sys
@@ -10,6 +11,9 @@ from gs.config.config import Config, ConfigError
 # Local modules
 from locker import get_lock
 from servercomms import get_group_info_from_address, NotOk, add_post
+
+weLocked = False
+lock = None
 
 # See /usr/include/sysexits.h
 EX_OK       =  0
@@ -38,11 +42,13 @@ exit_vals = {
 
 def add_post_to_groupserver(progName, url, listId, emailMessage, token):
     # First, get the lock or die!!
+    global weLocked, lock 
     lock = get_lock()
     if not lock.i_am_locking():
-        m = '4.4.5 Not processing the message as the system is too busy.'
+        m = '4.4.5 Not processing the message, as the system is too busy.'
         sys.stderr.write(m)
         sys.exit(exit_vals['locked'])
+    weLocked = True
 
     parsedUrl = urlparse(url)
     if not parsedUrl.hostname:
@@ -77,7 +83,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
             sys.exit(exit_vals['communication_failure'])
         except ValueError, ve:
             m = '4.5.0 Could not decode the data returned by the server while '\
-                'looking up the \ngroup information. Check the token.\n'
+                'looking up the \ngroup information. Check the token?\n'
             sys.stderr.write(m)
             sys.exit(exit_vals['json_decode_error'])
             
@@ -101,12 +107,19 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
             'message:\n    %s\n' % (ne)
         sys.stderr.write(m)
         sys.exit(exit_vals['communication_failure'])
-    
-    ## VVVVVVVVVVVVVVVVVVVVVVVVVV ##
-    ## vvvvvvvvvvvvvvvvvvvvvvvvvv ##
-    lock.release() # Very important!
-    ## ^^^^^^^^^^^^^^^^^^^^^^^^^^ ##
-    ## AAAAAAAAAAAAAAAAAAAAAAAAAA ##
+
+@atexit.register
+def cleanup_lock():
+    global weLocked, lock
+    if weLocked:
+        sys.stderr.write('Cleaning up the lock\n')
+        ## VVVVVVVVVVVVVVVVVVVVVVVVVV ##
+        ## vvvvvvvvvvvvvvvvvvvvvvvvvv ##
+        lock.release() # Very important!
+        ## ^^^^^^^^^^^^^^^^^^^^^^^^^^ ##
+        ## AAAAAAAAAAAAAAAAAAAAAAAAAA ##
+    else:
+        sys.stderr.write('Leaving the lock alone\n')
 
 def MiB_to_B(mb):
     retval = mb * (2**20)
@@ -173,7 +186,7 @@ def main(configFileName):
             'bytes).\n' % (len(emailMessage), MiB_to_B(args.maxSize))
         sys.stderr.write(m)
         sys.exit(exit_vals['input_file_too_large'])
-
+    
     add_post_to_groupserver(p.prog, args.url, args.listId, emailMessage, token)
     sys.exit(0)
     
