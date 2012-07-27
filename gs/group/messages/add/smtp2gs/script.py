@@ -40,6 +40,21 @@ exit_vals = {
 # <http://tools.ietf.org/html/rfc3463>. If a problem can be changed with an
 # alteration to the configuration then a 4.x.x error will be returned.
 
+# XVERP addresses look like listId+userMailbox=user.domain@this.server
+XVERP_RE = re.compile('(.*?)\+(.*?)\=(.*?)\@(.*)')
+def is_an_xverp_bounce(toAddress):
+    result = XVERP_RE.search(toAddress)
+    retval = result and (len(result.groups()) == 4)
+    assert type(retval) == bool
+    return retval
+
+def handle_bounce(hostname, toAddress, token):
+    groups = XVERP_RE.search(toAddress).groups()
+    listAddress = '@'.join((groups[0], groups[3])) # listId@this.server
+    userAddress = '@'.join((groups[1], groups[2])) # userMailbox@user.domain
+    groupInfo = get_group_info_from_address(hostname, listAddress, token)
+    assert False, 'TODO: Handle bounces.'
+
 def add_post_to_groupserver(progName, url, listId, emailMessage, token):
     # First, get the lock or die!!
     global weLocked, lock 
@@ -55,6 +70,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         m = '4.5.2 No host in the URL <%s>\n' % (url)
         sys.stderr.write(m)
         sys.exit(exit_vals['url_bung'])
+    hostname = parsedUrl.hostname
 
     if listId:
         groupToSendTo = listId
@@ -67,10 +83,17 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
             sys.stderr.write(m)
             sys.exit(exit_vals['no_x_original_to'])
             
+        # Check for a XVERP bounce
+        if is_an_xverp_bounce(xOriginalTo):
+            handle_bounce(hostname, xOriginalTo, token)
+            m = '2.1.5 The XVERP bounce was processed.'
+            sys.stderr.write(m)
+            sys.exit(exit_vals['success'])
+            
         # Get the information about the group
         try:
-            groupInfo = get_group_info_from_address(parsedUrl.hostname,
-                                                    xOriginalTo, token)
+            groupInfo = get_group_info_from_address(hostname, xOriginalTo, 
+                                                    token)
         except gaierror, g:
             m = '4.4.4 Error connecting to <%s> while looking up the group '\
                 'information:\n%s\n' %  (url, g)
@@ -96,7 +119,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         
     # Finally, add the email to the group.
     try:
-        add_post(parsedUrl.hostname, groupToSendTo, emailMessage, token)
+        add_post(hostname, groupToSendTo, emailMessage, token)
     except gaierror, g:
         m = '4.4.4 Error connecting to <%s> while adding the message:\n%s\n' %\
             (url, g)
@@ -185,7 +208,7 @@ def main(configFileName):
         sys.exit(exit_vals['input_file_too_large'])
     
     add_post_to_groupserver(p.prog, args.url, args.listId, emailMessage, token)
-    sys.exit(0)
+    sys.exit(exit_vals['success'])
     
 if __name__ == '__main__':
     main('etc/gsconfig.ini')
