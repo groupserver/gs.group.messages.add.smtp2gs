@@ -112,14 +112,11 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
 def cleanup_lock():
     global weLocked, lock
     if weLocked:
-        sys.stderr.write('Cleaning up the lock\n')
         ## VVVVVVVVVVVVVVVVVVVVVVVVVV ##
         ## vvvvvvvvvvvvvvvvvvvvvvvvvv ##
         lock.release() # Very important!
         ## ^^^^^^^^^^^^^^^^^^^^^^^^^^ ##
         ## AAAAAAAAAAAAAAAAAAAAAAAAAA ##
-    else:
-        sys.stderr.write('Leaving the lock alone\n')
 
 def MiB_to_B(mb):
     retval = mb * (2**20)
