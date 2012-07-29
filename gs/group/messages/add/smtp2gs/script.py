@@ -77,7 +77,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
             sys.stderr.write(m)
             sys.exit(exit_vals['socket_error'])
         except NotOk, ne:
-            m = '5.5.0 Error communicating with the server while looking up '\
+            m = '4.5.0 Error communicating with the server while looking up '\
                 'the group information:\n%s\n' % (ne)
             sys.stderr.write(m)
             sys.exit(exit_vals['communication_failure'])
@@ -103,7 +103,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         sys.stderr.write(m)
         sys.exit(exit_vals['socket_error'])
     except NotOk, ne:
-        m = '5.5.0 Issue communicating with the server while adding the '\
+        m = '4.5.0 Issue communicating with the server while adding the '\
             'message:\n    %s\n' % (ne)
         sys.stderr.write(m)
         sys.exit(exit_vals['communication_failure'])
