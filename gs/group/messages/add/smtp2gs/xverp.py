@@ -7,7 +7,7 @@ from servercomms import get_group_info_from_address, add_bounce
 XVERP_RE = re.compile('(.*?)\+(.*?)\=(.*?)\@(.*)')
 def is_an_xverp_bounce(toAddress):
     result = XVERP_RE.search(toAddress)
-    retval = result and (len(result.groups()) == 4)
+    retval = bool(result) and (len(result.groups()) == 4)
     assert type(retval) == bool
     return retval
 
