@@ -17,5 +17,5 @@ def handle_bounce(hostname, toAddress, token):
     userAddress = '@'.join((groups[1], groups[2])) # userMailbox@user.domain
 
     groupInfo = get_group_info_from_address(hostname, listAddress, token)
-    host = urlparse(groupInfo['siteUrl'])[1]
+    host = urlparse(groupInfo['siteUrl']).hostname
     add_bounce(host, userAddress, groupInfo['groupId'], token)
