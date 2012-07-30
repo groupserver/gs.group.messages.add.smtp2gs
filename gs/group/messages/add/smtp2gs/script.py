@@ -42,61 +42,23 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         sys.exit(exit_vals['url_bung'])
     hostname = parsedUrl.hostname
 
-    if listId:
+    email = message_from_string(emailMessage)
+    xOriginalTo = email['x-original-to']
+    if xOriginalTo == None:
+        m = '5.1.3 No "x-original-to" header in the email message.\n' 
+        sys.stderr.write(m)
+        sys.exit(exit_vals['no_x_original_to'])
+
+    if is_an_xverp_bounce(xOriginalTo):
+        handle_bounce(hostname, xOriginalTo, token)
+        m = '2.1.5 The XVERP bounce was processed.'
+        sys.stderr.write(m)
+        sys.exit(exit_vals['success'])
+    elif listId:
         groupToSendTo = listId
     else:
-        # Figure out if the group exists.
-        email = message_from_string(emailMessage)
-        xOriginalTo = email['x-original-to']
-        if xOriginalTo == None:
-            m = '5.1.3 No "x-original-to" header in the email message.\n' 
-            sys.stderr.write(m)
-            sys.exit(exit_vals['no_x_original_to'])
-            
-        # Check for a XVERP bounce
-        if is_an_xverp_bounce(xOriginalTo):
-            try:
-                handle_bounce(hostname, xOriginalTo, token)
-            except gaierror, g:
-                m = '4.4.4 Error connecting to the server while processing '\
-                    'the XVERP bounce:\n%s\n' %  (g)
-                sys.stderr.write(m)
-                sys.exit(exit_vals['socket_error'])
-            except NotOk, ne:
-                m = '4.5.0 Error communicating with the server while '\
-                    'processing the XVERP bounce:\n%s\n' % (ne)
-                sys.stderr.write(m)
-                sys.exit(exit_vals['communication_failure'])
-            except ValueError, ve:
-                m = '4.5.0 Could not decode the data returned by the server '\
-                    'while processing the \nXVERP bounce. Check the token?\n'
-                sys.stderr.write(m)
-                sys.exit(exit_vals['json_decode_error'])
-            else:            
-                m = '2.1.5 The XVERP bounce was processed.'
-                sys.stderr.write(m)
-                sys.exit(exit_vals['success'])
-            
         # Get the information about the group
-        try:
-            groupInfo = get_group_info_from_address(hostname, xOriginalTo, 
-                                                    token)
-        except gaierror, g:
-            m = '4.4.4 Error connecting to <%s> while looking up the group '\
-                'information:\n%s\n' %  (url, g)
-            sys.stderr.write(m)
-            sys.exit(exit_vals['socket_error'])
-        except NotOk, ne:
-            m = '4.5.0 Error communicating with the server while looking up '\
-                'the group information:\n%s\n' % (ne)
-            sys.stderr.write(m)
-            sys.exit(exit_vals['communication_failure'])
-        except ValueError, ve:
-            m = '4.5.0 Could not decode the data returned by the server while '\
-                'looking up the \ngroup information. Check the token?\n'
-            sys.stderr.write(m)
-            sys.exit(exit_vals['json_decode_error'])
-            
+        groupInfo = get_group_info_from_address(hostname, xOriginalTo, token)
         groupToSendTo = groupInfo['groupId']
 
     if not(groupToSendTo):
@@ -105,18 +67,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         sys.exit(exit_vals['no_group'])
         
     # Finally, add the email to the group.
-    try:
-        add_post(hostname, groupToSendTo, emailMessage, token)
-    except gaierror, g:
-        m = '4.4.4 Error connecting to <%s> while adding the message:\n%s\n' %\
-            (url, g)
-        sys.stderr.write(m)
-        sys.exit(exit_vals['socket_error'])
-    except NotOk, ne:
-        m = '4.5.0 Issue communicating with the server while adding the '\
-            'message:\n    %s\n' % (ne)
-        sys.stderr.write(m)
-        sys.exit(exit_vals['communication_failure'])
+    add_post(hostname, groupToSendTo, emailMessage, token)
 
 @atexit.register
 def cleanup_lock():
@@ -165,9 +116,27 @@ def main(configFileName):
             'bytes).\n' % (len(emailMessage), MiB_to_B(args.maxSize))
         sys.stderr.write(m)
         sys.exit(exit_vals['input_file_too_large'])
-    
-    add_post_to_groupserver(p.prog, args.url, args.listId, emailMessage, token)
-    sys.exit(exit_vals['success'])
+
+    try:
+        add_post_to_groupserver(p.prog, args.url, args.listId, emailMessage, 
+                                token)
+    except gaierror, g:
+        m = '4.4.4 Error connecting to the server while processing '\
+            'the message:\n%s\n' %  (g)
+        sys.stderr.write(m)
+        sys.exit(exit_vals['socket_error'])
+    except NotOk, ne:
+        m = '4.5.0 Error communicating with the server while '\
+            'processing the message:\n%s\n' % (ne)
+        sys.stderr.write(m)
+        sys.exit(exit_vals['communication_failure'])
+    except ValueError, ve:
+        m = '4.5.0 Could not decode the data returned by the server '\
+            'while processing the\nmessage. Check the token?\n'
+        sys.stderr.write(m)
+        sys.exit(exit_vals['json_decode_error'])
+    else:
+        sys.exit(exit_vals['success'])
     
 if __name__ == '__main__':
     main('etc/gsconfig.ini')
