@@ -51,7 +51,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
 
     if is_an_xverp_bounce(xOriginalTo):
         handle_bounce(hostname, xOriginalTo, token)
-        m = '2.1.5 The XVERP bounce was processed.'
+        m = '2.1.5 The XVERP bounce was processed.\n'
         sys.stderr.write(m)
         sys.exit(exit_vals['success'])
     elif listId: # We were explicitly passed the group id
