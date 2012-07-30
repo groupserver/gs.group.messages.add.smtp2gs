@@ -52,10 +52,15 @@ def handle_bounce(hostname, toAddress, token):
     groups = XVERP_RE.search(toAddress).groups()
     listAddress = '@'.join((groups[0], groups[3])) # listId@this.server
     userAddress = '@'.join((groups[1], groups[2])) # userMailbox@user.domain
+
     groupInfo = get_group_info_from_address(hostname, listAddress, token)
-    assert False, 'TODO: Handle bounces.'
+    host = urlparse(groupInfo['siteUrl'])[1]
+    add_bounce(host, userAddress, groupInfo['groupId'], token)
 
 def add_post_to_groupserver(progName, url, listId, emailMessage, token):
+    # WARNING: multiple exit points below thanks to "sys.exit" calls. Dijkstra 
+    # will hate me for this.
+
     # First, get the lock or die!!
     global weLocked, lock 
     lock = get_lock()
@@ -85,10 +90,27 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
             
         # Check for a XVERP bounce
         if is_an_xverp_bounce(xOriginalTo):
-            handle_bounce(hostname, xOriginalTo, token)
-            m = '2.1.5 The XVERP bounce was processed.'
-            sys.stderr.write(m)
-            sys.exit(exit_vals['success'])
+            try:
+                handle_bounce(hostname, xOriginalTo, token)
+            except gaierror, g:
+                m = '4.4.4 Error connecting to the server while processing '\
+                    'the XVERP bounce:\n%s\n' %  (g)
+                sys.stderr.write(m)
+                sys.exit(exit_vals['socket_error'])
+            except NotOk, ne:
+                m = '4.5.0 Error communicating with the server while '\
+                    'processing the XVERP bounce:\n%s\n' % (ne)
+                sys.stderr.write(m)
+                sys.exit(exit_vals['communication_failure'])
+            except ValueError, ve:
+                m = '4.5.0 Could not decode the data returned by the server '\
+                    'while processing the \nXVERP bounce. Check the token?\n'
+                sys.stderr.write(m)
+                sys.exit(exit_vals['json_decode_error'])
+            else:            
+                m = '2.1.5 The XVERP bounce was processed.'
+                sys.stderr.write(m)
+                sys.exit(exit_vals['success'])
             
         # Get the information about the group
         try:
