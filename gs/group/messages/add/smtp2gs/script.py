@@ -1,6 +1,5 @@
 # coding=utf-8
 # Standard modules
-from argparse import ArgumentParser, FileType, Action
 import atexit
 from email import message_from_string
 from socket import gaierror
@@ -9,53 +8,19 @@ from urlparse import urlparse
 # GroupServer modules
 from gs.config.config import Config, ConfigError
 # Local modules
+from errorvals import EX_OK, EX_USAGE, EX_DATAERR, EX_NOUSER, EX_PROTOCOL, \
+    EX_TEMPFAIL, EX_CONFIG, exit_vals
+from getargs import get_args
 from locker import get_lock
 from servercomms import get_group_info_from_address, NotOk, add_post
+from xverp import is_an_xverp_bounce, handle_bounce
 
 weLocked = False
 lock = None
 
-# See /usr/include/sysexits.h
-EX_OK       =  0
-EX_USAGE    = 64
-EX_DATAERR  = 65
-EX_NOUSER   = 67
-EX_PROTOCOL = 76
-EX_TEMPFAIL = 75
-EX_CONFIG   = 78
-exit_vals = {
-    'success':               EX_OK,
-    'input_file_empty':      EX_DATAERR,
-    'input_file_too_large':  EX_DATAERR,
-    'config_error':          EX_CONFIG,
-    'url_bung':              EX_USAGE,
-    'communication_failure': EX_PROTOCOL,
-    'socket_error':          EX_PROTOCOL,
-    'locked':                EX_TEMPFAIL, # Postfix will try again later
-    'no_x_original_to':      EX_DATAERR,
-    'json_decode_error':     EX_PROTOCOL,
-    'no_group':              EX_NOUSER,}
-
 # The error-messages that are written to STDERR conform to RFC 3463
 # <http://tools.ietf.org/html/rfc3463>. If a problem can be changed with an
 # alteration to the configuration then a 4.x.x error will be returned.
-
-# XVERP addresses look like listId+userMailbox=user.domain@this.server
-XVERP_RE = re.compile('(.*?)\+(.*?)\=(.*?)\@(.*)')
-def is_an_xverp_bounce(toAddress):
-    result = XVERP_RE.search(toAddress)
-    retval = result and (len(result.groups()) == 4)
-    assert type(retval) == bool
-    return retval
-
-def handle_bounce(hostname, toAddress, token):
-    groups = XVERP_RE.search(toAddress).groups()
-    listAddress = '@'.join((groups[0], groups[3])) # listId@this.server
-    userAddress = '@'.join((groups[1], groups[2])) # userMailbox@user.domain
-
-    groupInfo = get_group_info_from_address(hostname, listAddress, token)
-    host = urlparse(groupInfo['siteUrl'])[1]
-    add_bounce(host, userAddress, groupInfo['groupId'], token)
 
 def add_post_to_groupserver(progName, url, listId, emailMessage, token):
     # WARNING: multiple exit points below thanks to "sys.exit" calls. Dijkstra 
@@ -179,35 +144,7 @@ def get_token_from_config(configSet, configFileName):
     return retval
 
 def main(configFileName):
-    p = ArgumentParser(description='Add an email message to GroupServer.',
-                       epilog='Usually %(prog)s is called by a SMTP server '\
-                           '(such as Postfix) in order to add an email '\
-                           'message to a GroupServer group.')
-    p.add_argument('url', metavar='url', 
-                   help='The URL for the GroupServer site.')
-    p.add_argument('-m', '--max-size', dest='maxSize', type=int, default=200,
-                   help='The maximum size of the post that will be accepted, '\
-                       'in mebibytes (default %(default)sMiB).')
-    p.add_argument('-l', '--list', dest='listId', default=None,
-                   help='The list to send the message to. By default it is '\
-                       'extracted from the x-original-to header.')
-    p.add_argument('-f', '--file', dest='file', default='-', 
-                   type=FileType('r'),
-                   help='The name of the file that contains the message. If '\
-                       'omitted (or "%(default)s") standard-input will be '\
-                       'read.')
-    p.add_argument('-c', '--config', dest='config', default=configFileName,
-                   type=str,
-                   help='The name of the GroupServer configuration file '\
-                       '(default "%(default)s") that contains the token that '\
-                       'will be used to authenticate the script when it tries '\
-                       'to add the email to the site.')
-    p.add_argument('-i','--instance', dest='instance', default='default',
-                   type=str,
-                   help = 'The identifier of the GroupServer instance '\
-                       'configuration to use (default "%(default)s").')
-    args = p.parse_args()
-    
+    args = get_args(configFileName)
     try:
         token = get_token_from_config(args.instance, args.config)
     except ConfigError, ce:
