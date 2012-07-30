@@ -54,10 +54,9 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         m = '2.1.5 The XVERP bounce was processed.'
         sys.stderr.write(m)
         sys.exit(exit_vals['success'])
-    elif listId:
+    elif listId: # We were explicitly passed the group id
         groupToSendTo = listId
-    else:
-        # Get the information about the group
+    else: # Get the information about the group
         groupInfo = get_group_info_from_address(hostname, xOriginalTo, token)
         groupToSendTo = groupInfo['groupId']
 
@@ -118,8 +117,8 @@ def main(configFileName):
         sys.exit(exit_vals['input_file_too_large'])
 
     try:
-        add_post_to_groupserver(p.prog, args.url, args.listId, emailMessage, 
-                                token)
+        add_post_to_groupserver(sys.argv[0], args.url, args.listId, 
+                                emailMessage, token)
     except gaierror, g:
         m = '4.4.4 Error connecting to the server while processing '\
             'the message:\n%s\n' %  (g)
