@@ -9,7 +9,6 @@ class NotOk(Exception):
     pass
 
 GROUP_EXISTS_URI = '/gs-group-messages-add-group-exists.html'
-
 def get_group_info_from_address(hostname, address, token):
     fields = {'form.email': address, 'form.token': token,
               'form.actions.check': 'Check'}
@@ -26,6 +25,15 @@ def add_post(hostname, groupId, emailMessage, token):
     fields = {'form.emailMessage': emailMessage, 'form.groupId': groupId,
               'form.token': token, 'form.actions.add': 'Add'}
     status, reason, data = post_multipart(hostname, ADD_POST_URI, 
+                                          fields) # port?
+    if status != HTTP_OK:
+        raise NotOk('%s (%d)' % (reason, status))
+
+BOUNCE_URI = '/gs-group-member-bounce.html'
+def add_bounce(hostname, userEmailAddress, groupId, token):
+    fields = {'form.userEmail': userEmailAddress, 'form.groupId': groupId,
+              'form.token': token, 'form.actions.handle': 'Handle'}
+    status, reason, data = post_multipart(hostname, BOUNCE_URI, 
                                           fields) # port?
     if status != HTTP_OK:
         raise NotOk('%s (%d)' % (reason, status))
