@@ -1,7 +1,7 @@
 # coding=utf-8
 from argparse import ArgumentParser, FileType, Action
 
-def get_args(configFileName)
+def get_args(configFileName):
     p = ArgumentParser(description='Add an email message to GroupServer.',
                        epilog='Usually %(prog)s is called by a SMTP server '\
                            '(such as Postfix) in order to add an email '\
