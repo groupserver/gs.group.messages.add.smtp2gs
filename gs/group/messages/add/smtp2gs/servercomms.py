@@ -15,7 +15,7 @@ def get_group_info_from_address(hostname, address, token):
     status, reason, data = post_multipart(hostname, GROUP_EXISTS_URI, 
                                           fields) # port?
     if status != HTTP_OK:
-        raise NotOk('%s (%d)' % (reason, status))
+        raise NotOk('%s (%d <%s>)' % (reason, status, hostname))
 
     retval = json_loads(data)
     return retval
@@ -27,13 +27,14 @@ def add_post(hostname, groupId, emailMessage, token):
     status, reason, data = post_multipart(hostname, ADD_POST_URI, 
                                           fields) # port?
     if status != HTTP_OK:
-        raise NotOk('%s (%d)' % (reason, status))
+        raise NotOk('%s (%d <%s>)' % (reason, status, hostname))
 
 BOUNCE_URI = '/gs-group-member-bounce.html'
-def add_bounce(hostname, userEmailAddress, groupId, token):
-    fields = {'form.userEmail': userEmailAddress, 'form.groupId': groupId,
+def add_bounce(hostname, userEmailAddress, groupEmailAddress, token):
+    fields = {'form.userEmail': userEmailAddress, 
+              'form.groupEmail': groupEmailAddress,
               'form.token': token, 'form.actions.handle': 'Handle'}
     status, reason, data = post_multipart(hostname, BOUNCE_URI, 
                                           fields) # port?
     if status != HTTP_OK:
-        raise NotOk('%s (%d)' % (reason, status))
+        raise NotOk('%s (%d <%s>)' % (reason, status, hostname))
