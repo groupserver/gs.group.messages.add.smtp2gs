@@ -24,7 +24,7 @@ def get_group_info_from_address(hostname, address, token):
 ADD_POST_URI = '/gs-group-messages-add-email.html'
 def add_post(hostname, groupId, emailMessage, token):
     # we do this to ensure we have no problems with attachments
-    emailMessage = base64.encodeb64(emailMessage)
+    emailMessage = base64.b64encode(emailMessage)
     fields = {'form.emailMessage': emailMessage, 'form.groupId': groupId,
               'form.token': token, 'form.actions.add': 'Add'}
     status, reason, data = post_multipart(hostname, ADD_POST_URI, 
