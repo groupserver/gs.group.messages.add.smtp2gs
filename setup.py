@@ -1,9 +1,20 @@
 # coding=utf-8
 import os
+import sys
 from setuptools import setup, find_packages
 from version import get_version
 
 version = get_version()
+
+# The argparse library was added to core in Python 2.7
+core = ['setuptools',
+        'lockfile',
+        'gs.config',  # Note: without zope-support
+        'gs.form', ]
+if sys.version_info > (2, 6):
+    requires = core
+else:
+    requires = core + ['argparse']
 
 setup(name='gs.group.messages.add.smtp2gs',
     version=version,
@@ -27,16 +38,11 @@ setup(name='gs.group.messages.add.smtp2gs',
     url='http://groupserver.org/',
     license='other',
     packages=find_packages(exclude=['ez_setup']),
-    namespace_packages=['gs', 'gs.group', 'gs.group.messages', 
+    namespace_packages=['gs', 'gs.group', 'gs.group.messages',
                         'gs.group.messages.add'],
     include_package_data=True,
     zip_safe=True,
-    install_requires=[
-        'setuptools',
-        'lockfile',
-        'gs.form',
-        # -*- Extra requirements: -*-
-    ],
+    install_requires=requires,
     entry_points={
         'console_scripts': [
             'smtp2gs = gs.group.messages.add.smtp2gs.script:main',
