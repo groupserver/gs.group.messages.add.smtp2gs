@@ -8,8 +8,7 @@ from urlparse import urlparse
 # GroupServer modules
 from gs.config.config import Config, ConfigError
 # Local modules
-from errorvals import EX_OK, EX_USAGE, EX_DATAERR, EX_NOUSER, EX_PROTOCOL, \
-    EX_TEMPFAIL, EX_CONFIG, exit_vals
+from errorvals import exit_vals
 from getargs import get_args
 from locker import get_lock
 from servercomms import get_group_info_from_address, NotOk, add_post
@@ -22,12 +21,13 @@ lock = None
 # <http://tools.ietf.org/html/rfc3463>. If a problem can be changed with an
 # alteration to the configuration then a 4.x.x error will be returned.
 
+
 def add_post_to_groupserver(progName, url, listId, emailMessage, token):
-    # WARNING: multiple exit points below thanks to "sys.exit" calls. Dijkstra 
+    # WARNING: multiple exit points below thanks to "sys.exit" calls. Dijkstra
     # will hate me for this.
 
     # First, get the lock or die!!
-    global weLocked, lock 
+    global weLocked, lock
     lock = get_lock()
     if not lock.i_am_locking():
         m = '4.4.5 Not processing the message, as the system is too busy.'
@@ -44,8 +44,8 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
 
     email = message_from_string(emailMessage)
     xOriginalTo = email['x-original-to']
-    if xOriginalTo == None:
-        m = '5.1.3 No "x-original-to" header in the email message.\n' 
+    if xOriginalTo is None:
+        m = '5.1.3 No "x-original-to" header in the email message.\n'
         sys.stderr.write(m)
         sys.exit(exit_vals['no_x_original_to'])
 
@@ -54,9 +54,9 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         m = '2.1.5 The XVERP bounce was processed.\n'
         sys.stderr.write(m)
         sys.exit(exit_vals['success'])
-    elif listId: # We were explicitly passed the group id
+    elif listId:  # We were explicitly passed the group id
         groupToSendTo = listId
-    else: # Get the information about the group
+    else:  # Get the information about the group
         groupInfo = get_group_info_from_address(hostname, xOriginalTo, token)
         groupToSendTo = groupInfo['groupId']
 
@@ -64,24 +64,27 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         m = '5.1.1 There is no such group on this site.'
         sys.stderr.write(m)
         sys.exit(exit_vals['no_group'])
-        
+
     # Finally, add the email to the group.
     add_post(hostname, groupToSendTo, emailMessage, token)
+
 
 @atexit.register
 def cleanup_lock():
     global weLocked, lock
     if weLocked:
-        ## VVVVVVVVVVVVVVVVVVVVVVVVVV ##
-        ## vvvvvvvvvvvvvvvvvvvvvvvvvv ##
-        lock.release() # Very important!
-        ## ^^^^^^^^^^^^^^^^^^^^^^^^^^ ##
-        ## AAAAAAAAAAAAAAAAAAAAAAAAAA ##
+        ## VVVVVVVVVVVVVVVVVVVVVVVVVVV ##
+        ## vvvvvvvvvvvvvvvvvvvvvvvvvvv ##
+        lock.release()  # Very important!
+        ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^ ##
+        ## AAAAAAAAAAAAAAAAAAAAAAAAAAA ##
+
 
 def MiB_to_B(mb):
-    retval = mb * (2**20)
+    retval = mb * (2 ** 20)
     assert retval > mb
     return retval
+
 
 def get_token_from_config(configSet, configFileName):
     config = Config(configSet, configFileName)
@@ -92,6 +95,7 @@ def get_token_from_config(configSet, configFileName):
         m = 'The token was not set.'
         raise ValueError(m)
     return retval
+
 
 def main(configFileName):
     args = get_args(configFileName)
@@ -117,11 +121,11 @@ def main(configFileName):
         sys.exit(exit_vals['input_file_too_large'])
 
     try:
-        add_post_to_groupserver(sys.argv[0], args.url, args.listId, 
+        add_post_to_groupserver(sys.argv[0], args.url, args.listId,
                                 emailMessage, token)
     except gaierror, g:
         m = '4.4.4 Error connecting to the server while processing '\
-            'the message:\n%s\n' %  (g)
+            'the message:\n%s\n' % (g)
         sys.stderr.write(m)
         sys.exit(exit_vals['socket_error'])
     except NotOk, ne:
@@ -129,13 +133,13 @@ def main(configFileName):
             'processing the message:\n%s\n' % (ne)
         sys.stderr.write(m)
         sys.exit(exit_vals['communication_failure'])
-    except ValueError, ve:
+    except ValueError:
         m = '4.5.0 Could not decode the data returned by the server '\
             'while processing the\nmessage. Check the token?\n'
         sys.stderr.write(m)
         sys.exit(exit_vals['json_decode_error'])
     else:
         sys.exit(exit_vals['success'])
-    
+
 if __name__ == '__main__':
     main('etc/gsconfig.ini')
