@@ -1,10 +1,25 @@
+=================================
+``gs.group.messages.add.smtp2gs``
+=================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Add a message to GroupServer from an SMTP server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:Author: `Michael JasonSmith`_
+:Contact: Michael JasonSmith <mpj17@onlinegroups.net>
+:Date: 2013-08-27
+:Organization: `GroupServer.org`_
+:Copyright: This document is licensed under a
+  `Creative Commons Attribution-Share Alike 3.0 New Zealand License`_
+  by `OnlineGroups.Net`_.
+
 Introduction
 ============
 
 This is the code for the `smtp2gs`_ script, which allows the external
-mail-transfer agent to add the message to `GroupServer`_.  The
-`configuration file`_ contains some information that allows the script to
-authenticate with the site.
+mail-transfer agent to add the message to GroupServer_.  The `configuration
+file`_ contains some information that allows the script to authenticate
+with the site.
 
 ``smtp2gs``
 ===========
@@ -204,6 +219,19 @@ URLs) that are supported by the same database::
   [webservice-default]
   token = theValueOfTheDefaultToken
 
+Resources
+=========
+
+- Code repository: https://source.iopen.net/groupserver/gs.group.messages.add.smtp2gs
+- Questions and comments to http://groupserver.org/groups/development
+- Report bugs at https://redmine.iopen.net/projects/groupserver
+
+.. _GroupServer: http://groupserver.org/
+.. _GroupServer.org: http://groupserver.org/
+.. _OnlineGroups.Net: https://onlinegroups.net
+.. _Michael JasonSmith: http://groupserver.org/p/mpj17
+.. _Creative Commons Attribution-Share Alike 3.0 New Zealand License:
+   http://creativecommons.org/licenses/by-sa/3.0/nz/
 .. [#entryPoint] See `Feature 3539 <https://redmine.iopen.net/issues/3539>`_
 .. [#rfc3463] `RFC 3463: Enhanced Mail System Status Codes 
              <http://tools.ietf.org/html/rfc3463>`_
@@ -215,6 +243,7 @@ URLs) that are supported by the same database::
             <https://source.iopen.net/groupserver/gs.auth.token/summary>
 .. [#config] See ``gs.config`` 
             <https://source.iopen.net/groupserver/gs.config/summary>
-.. _GroupServer: http://groupserver.org/
 
-..  LocalWords:  CONFIG config
+..  LocalWords:  CONFIG config theValueOfTheDefaultToken smtp entryPoint
+..  LocalWords:  MAXSIZE LISTID MiB tmp theValueOfTheToken firstSite nz
+..  LocalWords:  groupserver
