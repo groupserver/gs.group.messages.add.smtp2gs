@@ -14,11 +14,11 @@ class NotOk(Exception):
 GROUP_EXISTS_URI = '/gs-group-messages-add-group-exists.html'
 
 
-def get_group_info_from_address(hostname, address, token):
+def get_group_info_from_address(hostname, address, token, usessl):
     fields = {'form.email': address, 'form.token': token,
               'form.actions.check': 'Check'}
     status, reason, data = post_multipart(hostname, GROUP_EXISTS_URI,
-                                          fields)  # port?
+                                          fields, usessl=usessl)  # port?
     if status != HTTP_OK:
         raise NotOk('%s (%d <%s>)' % (reason, status, hostname))
 
@@ -48,6 +48,6 @@ def add_bounce(hostname, userEmailAddress, groupEmailAddress, token, usessl):
               'form.groupEmail': groupEmailAddress,
               'form.token': token, 'form.actions.handle': 'Handle'}
     status, reason, data = post_multipart(hostname, BOUNCE_URI,
-                                          fields, usessl)  # port?
+                                          fields, usessl=usessl)  # port?
     if status != HTTP_OK:
         raise NotOk('%s (%d <%s>)' % (reason, status, hostname))
