@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 # Standard modules
 import atexit
 from email import message_from_string
@@ -40,7 +40,8 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         m = '4.5.2 No host in the URL <%s>\n' % (url)
         sys.stderr.write(m)
         sys.exit(exit_vals['url_bung'])
-    hostname = parsedUrl.hostname
+    hostname = parsedUrl.netloc
+    usessl = parsedUrl.scheme == 'https'
 
     email = message_from_string(emailMessage)
     xOriginalTo = email['x-original-to']
@@ -57,7 +58,8 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
     elif listId:  # We were explicitly passed the group id
         groupToSendTo = listId
     else:  # Get the information about the group
-        groupInfo = get_group_info_from_address(hostname, xOriginalTo, token)
+        groupInfo = get_group_info_from_address(hostname, xOriginalTo, token,
+                                                usessl)
         groupToSendTo = groupInfo['groupId']
 
     if not(groupToSendTo):
@@ -66,7 +68,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         sys.exit(exit_vals['no_group'])
 
     # Finally, add the email to the group.
-    add_post(hostname, groupToSendTo, emailMessage, token)
+    add_post(hostname, groupToSendTo, emailMessage, token, usessl)
 
 
 @atexit.register

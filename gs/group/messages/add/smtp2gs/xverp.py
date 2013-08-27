@@ -13,8 +13,8 @@ def is_an_xverp_bounce(toAddress):
     return retval
 
 
-def handle_bounce(hostname, toAddress, token):
+def handle_bounce(hostname, toAddress, token, usessl):
     groups = XVERP_RE.search(toAddress).groups()
     listAddress = '@'.join((groups[0], groups[3]))  # listId@this.server
     userAddress = '@'.join((groups[1], groups[2]))  # userMailbox@user.domain
-    add_bounce(hostname, userAddress, listAddress, token)
+    add_bounce(hostname, userAddress, listAddress, token, usessl)
