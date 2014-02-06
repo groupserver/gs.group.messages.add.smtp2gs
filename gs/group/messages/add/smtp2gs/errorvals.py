@@ -1,5 +1,20 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 # See /usr/include/sysexits.h
+# Copyright (c) 1987, 1993
+#      The Regents of the University of California.  All rights reserved.
+##############################################################################
+#
+# Copyright © 2014 OnlineGroups.net and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
 EX_OK = 0
 EX_USAGE = 64
 EX_DATAERR = 65

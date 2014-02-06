@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+##############################################################################
+#
+# Copyright © 2014 OnlineGroups.net and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+from __future__ import absolute_import, unicode_literals
 # Standard modules
 import atexit
 from email import message_from_string
@@ -8,11 +22,11 @@ from urlparse import urlparse
 # GroupServer modules
 from gs.config.config import Config, ConfigError
 # Local modules
-from errorvals import exit_vals
-from getargs import get_args
-from locker import get_lock
-from servercomms import get_group_info_from_address, NotOk, add_post
-from xverp import is_an_xverp_bounce, handle_bounce
+from .errorvals import exit_vals
+from .getargs import get_args
+from .locker import get_lock
+from .servercomms import get_group_info_from_address, NotOk, add_post
+from .xverp import is_an_xverp_bounce, handle_bounce
 
 weLocked = False
 lock = None
@@ -103,7 +117,7 @@ def main(configFileName):
     args = get_args(configFileName)
     try:
         token = get_token_from_config(args.instance, args.config)
-    except ConfigError, ce:
+    except ConfigError as ce:
         m = '4.3.5: Error with the configuration file "%s":\n%s\n' %\
             (args.config, ce.message)
         sys.stderr.write(m)
@@ -125,12 +139,12 @@ def main(configFileName):
     try:
         add_post_to_groupserver(sys.argv[0], args.url, args.listId,
                                 emailMessage, token)
-    except gaierror, g:
+    except gaierror as g:
         m = '4.4.4 Error connecting to the server while processing '\
             'the message:\n%s\n' % (g)
         sys.stderr.write(m)
         sys.exit(exit_vals['socket_error'])
-    except NotOk, ne:
+    except NotOk as ne:
         m = '4.5.0 Error communicating with the server while '\
             'processing the message:\n%s\n' % (ne)
         sys.stderr.write(m)

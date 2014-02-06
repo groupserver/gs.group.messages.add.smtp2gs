@@ -1,15 +1,30 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
+##############################################################################
+#
+# Copyright © 2014 OnlineGroups.net and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+from __future__ import unicode_literals
 from lockfile import FileLock, LockTimeout
 from os.path import getmtime, isfile
 from time import time
 
-LOCK_NAME        = '/tmp/gs-group-messages-add-smtp2gs'
-LOCK_FILE        = LOCK_NAME + '.lock'
-MAX_LOCK_TIMEOUT =   5 # seconds
-BREAK_LOCK_AGE   = 300 # seconds == 5 minutes
+LOCK_NAME = '/tmp/gs-group-messages-add-smtp2gs'
+LOCK_FILE = LOCK_NAME + '.lock'
+MAX_LOCK_TIMEOUT = 5  # seconds
+BREAK_LOCK_AGE = 300  # seconds == 5 minutes
+
 
 def get_lock():
-    '''Get the lock for smtp2gs, breaking the lock if it has been held for too 
+    '''Get the lock for smtp2gs, breaking the lock if it has been held for too
 long.
 
 Arguments:
@@ -43,17 +58,19 @@ Returns:
 
     try:
         lock.acquire(timeout=MAX_LOCK_TIMEOUT)
-    except LockTimeout, lt:
+    except LockTimeout:
         pass
     return lock
+
 
 def create_file(fileName):
     if not isfile(fileName):
         f = file(fileName, 'w')
-        m = u'This file is part of the locking mechanism used by the '\
-            u'GroupServer smtp2gs\nscript.'
+        m = 'This file is part of the locking mechanism used by the '\
+            'GroupServer smtp2gs\nscript.'
         f.write(m.encode('utf-8'))
         f.close()
+
 
 def age(fileName):
     mTime = getmtime(fileName)

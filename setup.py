@@ -1,4 +1,17 @@
 # -*- coding: utf-8 -*-
+##############################################################################
+#
+# Copyright © 2014 OnlineGroups.net and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
 import os
 import sys
 from setuptools import setup, find_packages
@@ -41,7 +54,7 @@ setup(name='gs.group.messages.add.smtp2gs',
     namespace_packages=['gs', 'gs.group', 'gs.group.messages',
                         'gs.group.messages.add'],
     include_package_data=True,
-    zip_safe=True,
+    zip_safe=False,
     install_requires=requires,
     entry_points={
         'console_scripts': [

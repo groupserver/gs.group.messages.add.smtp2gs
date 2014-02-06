@@ -1,8 +1,21 @@
 # -*- coding: utf-8 -*-
+##############################################################################
+#
+# Copyright © 2014 OnlineGroups.net and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+from base64 import b64encode
 from httplib import OK as HTTP_OK
 from json import loads as json_loads
 from gs.form import post_multipart
-import base64
 
 HTTP_TIMEOUT = 8  # seconds
 
@@ -31,7 +44,7 @@ ADD_POST_URI = '/gs-group-messages-add-email.html'
 
 def add_post(hostname, groupId, emailMessage, token, usessl):
     # we do this to ensure we have no problems with attachments
-    emailMessage = base64.b64encode(emailMessage)
+    emailMessage = b64encode(emailMessage)
     fields = {'form.emailMessage': emailMessage, 'form.groupId': groupId,
               'form.token': token, 'form.actions.add': 'Add'}
     status, reason, data = post_multipart(hostname, ADD_POST_URI,
