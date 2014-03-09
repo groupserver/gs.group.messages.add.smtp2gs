@@ -113,7 +113,7 @@ def get_token_from_config(configSet, configFileName):
     return retval
 
 
-def main(configFileName):
+def main(configFileName='etc/gsconfig.ini'):
     args = get_args(configFileName)
     try:
         token = get_token_from_config(args.instance, args.config)
@@ -158,4 +158,4 @@ def main(configFileName):
         sys.exit(exit_vals['success'])
 
 if __name__ == '__main__':
-    main('etc/gsconfig.ini')
+    main()
