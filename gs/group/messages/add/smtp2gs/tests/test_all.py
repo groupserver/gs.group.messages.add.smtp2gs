@@ -14,10 +14,9 @@
 ##############################################################################
 from __future__ import absolute_import, unicode_literals
 from unittest import TestSuite, main as unittest_main
-#from gs.form.test.contenttype import TestContentType
 from gs.group.messages.add.smtp2gs.tests.xverp import TestXVERP
-# testCases = (TestContentType, TestEncode, TestPostMultipart, )
-testCases = (TestXVERP, )
+from gs.group.messages.add.smtp2gs.tests.servercomms import TestServerComms
+testCases = (TestXVERP, TestServerComms, )
 
 
 def load_tests(loader, tests, pattern):
