@@ -13,6 +13,7 @@
 #
 ##############################################################################
 from __future__ import absolute_import, unicode_literals
+from base64 import b64encode
 from mock import MagicMock
 from json import dumps as to_json
 from unittest import TestCase
@@ -25,6 +26,10 @@ class TestServerComms(TestCase):
         r = (smtp2gs_servercomms.HTTP_OK, 'Ok', pageContent)
         smtp2gs_servercomms.post_multipart = MagicMock(return_value=r)
 
+    def check_field(self, fields, fieldId, expected):
+        self.assertIn(fieldId, fields)
+        self.assertEqual(fields[fieldId], expected)
+
     def test_get_group_info_from_address(self):
         smtp2gs_servercomms.get_group_info_from_address('gstest',
             'development@groupserver.org', 'token', True)
@@ -33,8 +38,42 @@ class TestServerComms(TestCase):
         self.assertEqual('gstest', args[0])
         self.assertEqual(smtp2gs_servercomms.GROUP_EXISTS_URI, args[1])
         fields = args[2]
-        self.assertIn('form.email', fields)
-        self.assertEqual(fields['form.email'], 'development@groupserver.org')
-        self.assertIn('form.token', fields)
+        self.check_field(fields, 'form.email', 'development@groupserver.org')
+        self.check_field(fields, 'form.token', 'token')
         self.assertIn('form.actions.check', fields)
+        self.assertTrue(kw_args['usessl'])
+
+    def test_add_post(self):
+        hostname = 'gstest'
+        group = 'development'
+        message = b'I am a fish'  # Note: a byte-string
+        token = 'token'
+        smtp2gs_servercomms.add_post(hostname, group, message, token, True)
+        self.assertEqual(1, smtp2gs_servercomms.post_multipart.call_count)
+        args, kw_args = smtp2gs_servercomms.post_multipart.call_args
+        self.assertEqual(hostname, args[0])
+        self.assertEqual(smtp2gs_servercomms.ADD_POST_URI, args[1])
+        fields = args[2]
+        self.check_field(fields, 'form.groupId', group)
+        self.check_field(fields, 'form.token', token)
+        self.check_field(fields, 'form.emailMessage', b64encode(message))
+        self.assertIn('form.actions.add', fields)
+        self.assertTrue(kw_args['usessl'])
+
+    def test_add_bounce(self):
+        hostname = 'gstest'
+        userEmail = 'mpj17@onlinegroups.net'
+        groupEmail = 'development@groupserver.org'
+        token = 'token'
+        smtp2gs_servercomms.add_bounce(hostname, userEmail, groupEmail, token,
+                                        True)
+        self.assertEqual(1, smtp2gs_servercomms.post_multipart.call_count)
+        args, kw_args = smtp2gs_servercomms.post_multipart.call_args
+        self.assertEqual(hostname, args[0])
+        self.assertEqual(smtp2gs_servercomms.BOUNCE_URI, args[1])
+        fields = args[2]
+        self.check_field(fields, 'form.userEmail', userEmail)
+        self.check_field(fields, 'form.groupEmail', groupEmail)
+        self.check_field(fields, 'form.token', token)
+        self.assertIn('form.actions.handle', fields)
         self.assertTrue(kw_args['usessl'])
