@@ -13,7 +13,11 @@
 #
 ##############################################################################
 from base64 import b64encode
-from httplib import OK as HTTP_OK
+import sys
+if (sys.version_info < (3, )):
+    from httplib import OK as HTTP_OK
+else:
+    from http.client import OK as HTTP_OK  # lint:ok
 from json import loads as json_loads
 from gs.form import post_multipart
 
