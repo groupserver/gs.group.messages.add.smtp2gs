@@ -23,14 +23,15 @@ import gs.group.messages.add.smtp2gs.servercomms as smtp2gs_servercomms
 class TestServerComms(TestCase):
     def setUp(self):
         pageContent = to_json({'foo': 'bar'})
-        r = (smtp2gs_servercomms.HTTP_OK, 'Ok', pageContent)
-        smtp2gs_servercomms.post_multipart = MagicMock(return_value=r)
+        self.ok = (smtp2gs_servercomms.HTTP_OK, 'Ok', pageContent)
+        self.fail = (500, 'So very not ok', pageContent)
 
     def check_field(self, fields, fieldId, expected):
         self.assertIn(fieldId, fields)
         self.assertEqual(fields[fieldId], expected)
 
     def test_get_group_info_from_address(self):
+        smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.ok)
         smtp2gs_servercomms.get_group_info_from_address('gstest',
             'development@groupserver.org', 'token', True)
         self.assertEqual(1, smtp2gs_servercomms.post_multipart.call_count)
@@ -43,11 +44,18 @@ class TestServerComms(TestCase):
         self.assertIn('form.actions.check', fields)
         self.assertTrue(kw_args['usessl'])
 
+    def test_get_group_info_from_address_fail(self):
+        smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.fail)
+        self.assertRaises(smtp2gs_servercomms.NotOk,
+            smtp2gs_servercomms.get_group_info_from_address,
+            'gstest', 'development@groupserver.org', 'token', True)
+
     def test_add_post(self):
         hostname = 'gstest'
         group = 'development'
         message = b'I am a fish'  # Note: a byte-string
         token = 'token'
+        smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.ok)
         smtp2gs_servercomms.add_post(hostname, group, message, token, True)
         self.assertEqual(1, smtp2gs_servercomms.post_multipart.call_count)
         args, kw_args = smtp2gs_servercomms.post_multipart.call_args
@@ -60,11 +68,18 @@ class TestServerComms(TestCase):
         self.assertIn('form.actions.add', fields)
         self.assertTrue(kw_args['usessl'])
 
+    def test_add_post_fail(self):
+        smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.fail)
+        self.assertRaises(smtp2gs_servercomms.NotOk,
+            smtp2gs_servercomms.add_post,
+            'gstest', 'development', b'I am a fish', 'token', True)
+
     def test_add_bounce(self):
         hostname = 'gstest'
         userEmail = 'mpj17@onlinegroups.net'
         groupEmail = 'development@groupserver.org'
         token = 'token'
+        smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.ok)
         smtp2gs_servercomms.add_bounce(hostname, userEmail, groupEmail, token,
                                         True)
         self.assertEqual(1, smtp2gs_servercomms.post_multipart.call_count)
@@ -77,3 +92,11 @@ class TestServerComms(TestCase):
         self.check_field(fields, 'form.token', token)
         self.assertIn('form.actions.handle', fields)
         self.assertTrue(kw_args['usessl'])
+
+    def test_add_bounce_fail(self):
+        smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.fail)
+        userEmail = 'mpj17@onlinegroups.net'
+        groupEmail = 'development@groupserver.org'
+        self.assertRaises(smtp2gs_servercomms.NotOk,
+            smtp2gs_servercomms.add_bounce,
+            'gstest', userEmail, groupEmail, 'token', True)
