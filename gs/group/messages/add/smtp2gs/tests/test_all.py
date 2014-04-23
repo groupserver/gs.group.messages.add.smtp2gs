@@ -16,7 +16,8 @@ from __future__ import absolute_import, unicode_literals
 from unittest import TestSuite, main as unittest_main
 from gs.group.messages.add.smtp2gs.tests.xverp import TestXVERP
 from gs.group.messages.add.smtp2gs.tests.servercomms import TestServerComms
-testCases = (TestXVERP, TestServerComms, )
+from gs.group.messages.add.smtp2gs.tests.locker import TestLocker
+testCases = (TestXVERP, TestServerComms, TestLocker)
 
 
 def load_tests(loader, tests, pattern):
