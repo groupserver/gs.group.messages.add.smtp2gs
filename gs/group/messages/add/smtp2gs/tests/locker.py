@@ -58,7 +58,6 @@ class TestLocker(TestCase):
 
     def test_get_lock_new_lock_locked(self):
         '''Test that a new process will acquire a lock'''
-        self.del_lock()
         lock = smtp2gs_locker.get_lock()
         self.assertTrue(lock.i_am_locking())
 
@@ -66,7 +65,6 @@ class TestLocker(TestCase):
         '''Test that a second process will not gain the lock, but it will
         time-out waiting for the lock, and end up with nothing.'''
         # --=mpj17=-- Using timeouts ain't pretty, but it works for 22:33.
-        self.del_lock()
         smtp2gs_locker.MAX_LOCK_TIMEOUT = 2  # seconds
 
         # Start a "badly behaved" subprocess, that will gain the lock.
@@ -88,13 +86,31 @@ class TestLocker(TestCase):
         self.assertGreaterEqual(diff, smtp2gs_locker.MAX_LOCK_TIMEOUT)
         self.assertLess(diff, smtp2gs_locker.MAX_LOCK_TIMEOUT * 2)
 
-        # Wait for the badly behave subprocess
+        # Wait for the badly behaved subprocess
         p.join()
 
     def test_get_lock_break_lock(self):
-        smtp2gs_locker.BREAK_LOCK_AGE = 3
-        self.del_lock()
+        '''Test the breaking of the lock, if a process has held it too long.'''
+        smtp2gs_locker.BREAK_LOCK_AGE = 3  # seconds
+        smtp2gs_locker.MAX_LOCK_TIMEOUT = 2  # seconds
         self.assertTrue(True)
+
+        # Start a "badly behaved" subprocess, that will gain the lock.
+        t = smtp2gs_locker.BREAK_LOCK_AGE * 3
+        p = Process(target=get_lock, args=(t, ))
+        p.start()
+
+        # Wait for the lock to be acquired by the badly behaved subprocess
+        sleep(smtp2gs_locker.BREAK_LOCK_AGE)
+
+        # Try and get the lock.
+        l2 = smtp2gs_locker.get_lock()
+
+        # Assert that we have the lock, because the lock has been broken
+        self.assertTrue(l2.i_am_locking())
+
+        # Wait for the badly behaved subprocess
+        p.join()
 
 
 def get_lock(t):
