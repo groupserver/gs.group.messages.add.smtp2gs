@@ -65,11 +65,10 @@ Returns:
 
 def create_file(fileName):
     if not isfile(fileName):
-        f = file(fileName, 'w')
-        m = 'This file is part of the locking mechanism used by the '\
-            'GroupServer smtp2gs\nscript.'
-        f.write(m.encode('utf-8'))
-        f.close()
+        with open(fileName, 'w') as f:
+            m = 'This file is part of the locking mechanism used by the '\
+                'GroupServer smtp2gs\nscript.'
+            f.write(m)
 
 
 def age(fileName):
