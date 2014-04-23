@@ -18,7 +18,6 @@ from os.path import getmtime, isfile
 from time import time
 
 LOCK_NAME = '/tmp/gs-group-messages-add-smtp2gs'
-LOCK_FILE = LOCK_NAME + '.lock'
 MAX_LOCK_TIMEOUT = 5  # seconds
 BREAK_LOCK_AGE = 300  # seconds == 5 minutes
 
@@ -52,8 +51,9 @@ Returns:
     # and check that the lock is not too old, then we exit. Postfix will
     # try running the script with the same arguments again later.
     lock = FileLock(LOCK_NAME)
+    lock_file = LOCK_NAME + '.lock'
     if not lock.i_am_locking():
-        if (isfile(LOCK_FILE) and (age(LOCK_FILE) > BREAK_LOCK_AGE)):
+        if (isfile(lock_file) and (age(lock_file) >= BREAK_LOCK_AGE)):
             lock.break_lock()
 
     try:
