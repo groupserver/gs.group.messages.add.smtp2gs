@@ -12,6 +12,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
+import codecs
 import os
 import sys
 from setuptools import setup, find_packages
@@ -29,11 +30,15 @@ if sys.version_info > (2, 6):
 else:
     requires = core + ['argparse']
 
+with codecs.open('README.txt', encoding='utf-8') as f:
+    long_description = f.read()
+with codecs.open(os.path.join("docs", "HISTORY.txt"), encoding='utf-8') as f:
+    long_description += '\n' + f.read()
+
 setup(name='gs.group.messages.add.smtp2gs',
     version=version,
     description="The console script for adding a message to GroupServer.",
-    long_description=open("README.txt").read() + "\n" +
-                      open(os.path.join("docs", "HISTORY.txt")).read(),
+    long_description=long_description,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         "Environment :: Web Environment",
@@ -63,6 +68,9 @@ setup(name='gs.group.messages.add.smtp2gs',
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
+    tests_require=['mock', ],
+    test_suite="gs.group.messages.add.smtp2gs.test.test_all",
+    extras_require={'docs': ['Sphinx'], },
     entry_points={
         'console_scripts': [
             'smtp2gs = gs.group.messages.add.smtp2gs.script:main',
