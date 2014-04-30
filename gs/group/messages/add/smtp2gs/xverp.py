@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+'''XVERP handling.'''
 ##############################################################################
 #
 # Copyright © 2014 OnlineGroups.net and Contributors.
@@ -16,19 +17,37 @@ from __future__ import absolute_import, unicode_literals
 import re
 from .servercomms import add_bounce
 
-# XVERP addresses look like listId+userMailbox=user.domain@this.server
+#: The regular expression for matching an XVERP address. They look like
+#: listId+userMailbox=user.domain@this.server
 XVERP_RE = re.compile('(.*?)\+(.*?)\=(.*?)\@(.*)')
 
 
 def is_an_xverp_bounce(toAddress):
+    '''Test if an address in an XVERP bounce.
+
+:param str toAddress: The address to check.
+:return: ``True`` if the address is an XVERP bounce.
+:rtype: bool'''
     result = XVERP_RE.search(toAddress)
     retval = bool(result) and (len(result.groups()) == 4)
     assert type(retval) == bool
     return retval
 
 
-def handle_bounce(hostname, toAddress, token, usessl):
+def handle_bounce(hostname, toAddress, token, usessl):  # Port?
+    '''Record that an XVERP bounce has occurred.
+
+:param str hostname: The GroupServer host-name.
+:param str toAddress: The address that is bouncing.
+:param str token: The token used to authenticate with GroupServer.
+:param bool usessl: ``True`` if TLS should be used with communicating with
+                    GroupServer.
+:return: Nothing.
+
+The ``toAddress`` is decomposed to the email address of the person whose inbox
+is bouncing, and this addresses is used to record the bounce.
+'''
     groups = XVERP_RE.search(toAddress).groups()
     listAddress = '@'.join((groups[0], groups[3]))  # listId@this.server
     userAddress = '@'.join((groups[1], groups[2]))  # userMailbox@user.domain
-    add_bounce(hostname, userAddress, listAddress, token, usessl)
+    add_bounce(hostname, userAddress, listAddress, token, usessl)  # Port?

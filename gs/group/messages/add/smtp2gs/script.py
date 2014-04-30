@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+'''The core code for the ``smtp2gs`` script.'''
 ##############################################################################
 #
 # Copyright © 2014 OnlineGroups.net and Contributors.
@@ -20,7 +21,7 @@ from socket import gaierror
 import sys
 from urlparse import urlparse
 # GroupServer modules
-from gs.config.config import Config, ConfigError
+from gs.config import Config, ConfigError
 # Local modules
 from .errorvals import exit_vals
 from .getargs import get_args
@@ -28,7 +29,10 @@ from .locker import get_lock
 from .servercomms import get_group_info_from_address, NotOk, add_post
 from .xverp import is_an_xverp_bounce, handle_bounce
 
+#: ``True`` if the current process is responsible for locking.
 weLocked = False
+
+#: The global lock object. See :func:`.locker.get_lock`.
 lock = None
 
 # The error-messages that are written to STDERR conform to RFC 3463
@@ -37,6 +41,21 @@ lock = None
 
 
 def add_post_to_groupserver(progName, url, listId, emailMessage, token):
+    '''Add a post to a GroupServer group.
+
+:param str progName: The name of the current program (for error messages)
+:param str url: The URL for the host to connect to.
+:param str listId: The identifier for the list (group) to add the group to.
+:param str emailMessage: The entire email message to add (including the header)
+:param str token: The authentiation token to pass to GroupServer.
+:return: Nothing. :func:`sys.exit` may be called to terminate the program if
+                  there is a problem, returning a value from :mod:`.errorvals`.
+
+The :func:`add_post_to_groupserver` function is the core of the ``smtp2gs``
+script. It checks that the email is valid (using the :mod:`email` module),
+ensures it is not a bounce (:mod:`.xverp`), gathers information about the
+group, and finally adds the post (:mod:`.servercomms`).
+'''
     # WARNING: multiple exit points below thanks to "sys.exit" calls. Dijkstra
     # will hate me for this.
 
@@ -55,6 +74,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
         sys.stderr.write(m)
         sys.exit(exit_vals['url_bung'])
     hostname = parsedUrl.netloc
+    # port?
     usessl = parsedUrl.scheme == 'https'
 
     email = message_from_string(emailMessage)
@@ -87,6 +107,12 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
 
 @atexit.register
 def cleanup_lock():
+    '''Unlock the file lock.
+
+The :func:`cleanup_lock` method is decorated with :func:`atexit.register` so
+it is always called. However, it only unlocks the lock if (and only if) it is
+the process responsible for locking the lock.
+'''
     global weLocked, lock
     if weLocked:
         ## VVVVVVVVVVVVVVVVVVVVVVVVVVV ##
@@ -97,12 +123,24 @@ def cleanup_lock():
 
 
 def MiB_to_B(mb):
+    '''Pretty-print a file size, in Megabytes (2**20)
+'''
     retval = mb * (2 ** 20)
     assert retval > mb
     return retval
 
 
 def get_token_from_config(configSet, configFileName):
+    '''Get the authentication token from the config.
+
+:param str configSet: The name of the configuration set to look up (see
+                      :class:`gs.config.Config`)
+:param str configFileName: The name of the configuration file that contains the
+token.
+:return: The authentication token for ``configSet`` in ``configFileName``
+:rtype: ``str``
+:raises ValueError: The token was not present in ``configSet``.
+'''
     config = Config(configSet, configFileName)
     config.set_schema('webservice', {'token': str})
     ws = config.get('webservice')
@@ -114,6 +152,16 @@ def get_token_from_config(configSet, configFileName):
 
 
 def main(configFileName='etc/gsconfig.ini'):
+    '''The main function in the ``smtp2gs`` script
+
+:param str configFileName: The name of the configuration file for GroupServer.
+:return: Nothing. :func:`sys.exit` is called with one of the values from
+                  :mod:`.errorvals`.
+
+The :func:`main` function parses the command-line arguments, retrieves the
+authentication token, opens the email message, and then calls
+:func:`add_post_to_groupserver`.
+'''
     args = get_args(configFileName)
     try:
         token = get_token_from_config(args.instance, args.config)

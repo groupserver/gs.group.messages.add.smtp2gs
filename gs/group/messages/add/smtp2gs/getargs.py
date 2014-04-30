@@ -17,6 +17,12 @@ from argparse import ArgumentParser, FileType
 
 
 def get_args(configFileName):
+    '''Get the command-line arguments
+
+:param str configFileName: The name of the GroupServer configuration file.
+:return: An argument parser.
+:rtype: class:`argparse.ArgumentParser`
+'''
     p = ArgumentParser(description='Add an email message to GroupServer.',
                        epilog='Usually %(prog)s is called by a SMTP server '
                            '(such as Postfix) in order to add an email '
