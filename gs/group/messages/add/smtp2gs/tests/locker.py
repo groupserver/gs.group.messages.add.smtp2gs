@@ -28,7 +28,7 @@ class TestLocker(TestCase):
         self.oldLockName = smtp2gs_locker.LOCK_NAME
         self.oldBreakLockTimeout = smtp2gs_locker.BREAK_LOCK_AGE
         self.maxLockTimeout = smtp2gs_locker.MAX_LOCK_TIMEOUT
-        with NamedTemporaryFile('w') as tmp:
+        with NamedTemporaryFile('w', delete=False) as tmp:
             smtp2gs_locker.LOCK_NAME = tmp.name
         self.del_lock()
 
