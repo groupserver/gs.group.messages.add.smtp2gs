@@ -28,7 +28,7 @@ def is_an_xverp_bounce(toAddress):
 :param str toAddress: The address to check.
 :return: ``True`` if the address is an XVERP bounce.
 :rtype: bool'''
-    result = XVERP_RE.search(toAddress)
+    result = XVERP_RE.search(toAddress) if toAddress else None
     retval = bool(result) and (len(result.groups()) == 4)
     assert type(retval) == bool
     return retval

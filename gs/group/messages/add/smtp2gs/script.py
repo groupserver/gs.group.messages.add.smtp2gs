@@ -48,7 +48,10 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
 
 :param str progName: The name of the current program (for error messages)
 :param str url: The URL for the host to connect to.
-:param str listId: The identifier for the list (group) to add the group to.
+:param str listId: The identifier for the list (group) to add the group to. If
+                   set to None or '' then the ``x-original-to`` header will be
+                   examined to determine the email address which is used to
+                   look up the ID of the group.
 :param str emailMessage: The entire email message to add (including the header)
 :param str token: The authentiation token to pass to GroupServer.
 :return: Nothing. :func:`sys.exit` may be called to terminate the program if
@@ -81,7 +84,7 @@ group, and finally adds the post (:mod:`.servercomms`).
 
     email = message_from_string(emailMessage)
     xOriginalTo = email['x-original-to']
-    if xOriginalTo is None:
+    if ((xOriginalTo is None) and (not listId)):
         m = '5.1.3 No "x-original-to" header in the email message.\n'
         sys.stderr.write(m)
         sys.exit(exit_vals['no_x_original_to'])
