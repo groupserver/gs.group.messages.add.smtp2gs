@@ -34,14 +34,14 @@ def is_an_xverp_bounce(toAddress):
     return retval
 
 
-def handle_bounce(hostname, toAddress, token, usessl):  # Port?
+def handle_bounce(netloc, usessl, toAddress, token):
     '''Record that an XVERP bounce has occurred.
 
-:param str hostname: The GroupServer host-name.
-:param str toAddress: The address that is bouncing.
-:param str token: The token used to authenticate with GroupServer.
+:param str netloc: The host-name of the GroupServer site (can have a ``:port``).
 :param bool usessl: ``True`` if TLS should be used with communicating with
                     GroupServer.
+:param str toAddress: The address that is bouncing.
+:param str token: The token used to authenticate with GroupServer.
 :return: Nothing.
 
 The ``toAddress`` is decomposed to the email address of the person whose inbox
@@ -50,4 +50,4 @@ is bouncing, and this addresses is used to record the bounce.
     groups = XVERP_RE.search(toAddress).groups()
     listAddress = '@'.join((groups[0], groups[3]))  # listId@this.server
     userAddress = '@'.join((groups[1], groups[2]))  # userMailbox@user.domain
-    add_bounce(hostname, userAddress, listAddress, token, usessl)  # Port?
+    add_bounce(netloc, usessl, userAddress, listAddress, token)

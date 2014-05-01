@@ -19,7 +19,10 @@ import atexit
 from email import message_from_string
 from socket import gaierror
 import sys
-from urlparse import urlparse
+if (sys.version_info < (3, )):
+    from urlparse import urlparse
+else:
+    from urllib.parse import urlparse  # lint:ok
 # GroupServer modules
 from gs.config import Config, ConfigError
 # Local modules
@@ -73,8 +76,7 @@ group, and finally adds the post (:mod:`.servercomms`).
         m = '4.5.2 No host in the URL <%s>\n' % (url)
         sys.stderr.write(m)
         sys.exit(exit_vals['url_bung'])
-    hostname = parsedUrl.netloc
-    # port?
+    netloc = parsedUrl.netloc  # Has a port in it
     usessl = parsedUrl.scheme == 'https'
 
     email = message_from_string(emailMessage)
@@ -85,15 +87,15 @@ group, and finally adds the post (:mod:`.servercomms`).
         sys.exit(exit_vals['no_x_original_to'])
 
     if is_an_xverp_bounce(xOriginalTo):
-        handle_bounce(hostname, xOriginalTo, token)
+        handle_bounce(netloc, usessl, xOriginalTo, token)
         m = '2.1.5 The XVERP bounce was processed.\n'
         sys.stderr.write(m)
         sys.exit(exit_vals['success'])
     elif listId:  # We were explicitly passed the group id
         groupToSendTo = listId
     else:  # Get the information about the group
-        groupInfo = get_group_info_from_address(hostname, xOriginalTo, token,
-                                                usessl)
+        groupInfo = get_group_info_from_address(netloc, usessl,
+                                                xOriginalTo, token)
         groupToSendTo = groupInfo['groupId']
 
     if not(groupToSendTo):
@@ -102,7 +104,7 @@ group, and finally adds the post (:mod:`.servercomms`).
         sys.exit(exit_vals['no_group'])
 
     # Finally, add the email to the group.
-    add_post(hostname, groupToSendTo, emailMessage, token, usessl)
+    add_post(netloc, usessl, groupToSendTo, emailMessage, token)
 
 
 @atexit.register

@@ -36,17 +36,17 @@ class NotOk(Exception):
 GROUP_EXISTS_URI = '/gs-group-messages-add-group-exists.html'
 
 
-def get_group_info_from_address(hostname, address, token, usessl):
+def get_group_info_from_address(netloc, usessl, address, token):
     '''Get the group information from an email address for the list.
 
-:param str hostname: The name of the GroupServer host to check with.
+:param str netloc: The name of the GroupServer host to check with.
+:param bool usessl: ``True`` if TLS should be used to communicate with the
+                    server.
 :param str address: The email address of the list (group) to be checked.
 :param str token: The authentication token to pass to GroupServer.
-:param bool usessl: ``True`` if SSL should be used to communicate with the
-                    server.
 :raises NotOk: If the server (``hostname``) responds with something
                    other than ``200``.
-:return: Information about the port.
+:return: Information about the group.
 :rtype: ``dict``
 
 Get information about a group, by sending the parameters to
@@ -56,10 +56,10 @@ and this is converted to a Python object before being returned
 '''
     fields = {'form.email': address, 'form.token': token,
               'form.actions.check': 'Check'}
-    status, reason, data = post_multipart(hostname, GROUP_EXISTS_URI,
-                                          fields, usessl=usessl)  # port?
+    status, reason, data = post_multipart(netloc, GROUP_EXISTS_URI,
+                                          fields, usessl=usessl)
     if status != HTTP_OK:
-        raise NotOk('%s (%d <%s>)' % (reason, status, hostname))
+        raise NotOk('%s (%d <%s>)' % (reason, status, netloc))
 
     retval = json_loads(data)
     return retval
@@ -69,15 +69,15 @@ and this is converted to a Python object before being returned
 ADD_POST_URI = '/gs-group-messages-add-email.html'
 
 
-def add_post(hostname, groupId, emailMessage, token, usessl):  # port?
+def add_post(netloc, usessl, groupId, emailMessage, token):
     '''Add a post to a GroupServer Group.
 
-:param str hostname: The name of the GroupServer host to add the message to.
+:param str netloc: The name of the GroupServer host to add the message to.
+:param bool usessl: ``True`` if TLS should be used to communicate with the
+                    server.
 :param str groupId: The ID of the group to add the message to.
 :param str emailMessage: The entire email message to add.
 :param str token: The authentication token to pass to GroupServer.
-:param bool usessl: ``True`` if SSL should be used to communicate with the
-                    server.
 :raises NotOk: If the server (``hostname``) responds with something
                other than ``200``
 :return: Nothing.
@@ -89,26 +89,27 @@ message is base-64 encoded (see :func:`base64.b64encode`) before being sent.
     emailMessage = b64encode(emailMessage)
     fields = {'form.emailMessage': emailMessage, 'form.groupId': groupId,
               'form.token': token, 'form.actions.add': 'Add'}
-    status, reason, data = post_multipart(hostname, ADD_POST_URI,
-                                          fields, usessl=usessl)  # port?
+    status, reason, data = post_multipart(netloc, ADD_POST_URI,
+                                          fields, usessl=usessl)
     if status != HTTP_OK:
-        raise NotOk('%s (%d <%s>)' % (reason, status, hostname))
+        raise NotOk('%s (%d <%s>)' % (reason, status, netloc))
 
 
 #: The URI that is used to record an XVERP bounce.
 BOUNCE_URI = '/gs-group-member-bounce.html'
 
 
-def add_bounce(hostname, userEmailAddress, groupEmailAddress, token, usessl):
+def add_bounce(netloc, usessl, userEmailAddress, groupEmailAddress,
+                token):
     '''Add a bounce to the server.
 
-:param str hostname: The name of the GroupServer host to log the bounce with.
+:param str netloc: The name of the GroupServer host to log the bounce with.
+:param bool usessl: ``True`` if TLS should be used to communicate with the
+                    server.
 :param str userEmailAddress: The email address that is bouncing.
 :param str groupEmailAddress: The email address of the group that sent the
                               message.
 :param str token: The authentication token to pass to GroupServer.
-:param bool usessl: ``True`` if SSL should be used to communicate with the
-                    server.
 :raises NotOk: If the server (``hostname``) responds with something
                other than ``200``
 :return: Nothing.
@@ -118,7 +119,7 @@ Log a bounce with GroupServer, by sending the parameters to
     fields = {'form.userEmail': userEmailAddress,
               'form.groupEmail': groupEmailAddress,
               'form.token': token, 'form.actions.handle': 'Handle'}
-    status, reason, data = post_multipart(hostname, BOUNCE_URI,
-                                          fields, usessl=usessl)  # port?
+    status, reason, data = post_multipart(netloc, BOUNCE_URI,
+                                          fields, usessl=usessl)
     if status != HTTP_OK:
-        raise NotOk('%s (%d <%s>)' % (reason, status, hostname))
+        raise NotOk('%s (%d <%s>)' % (reason, status, netloc))

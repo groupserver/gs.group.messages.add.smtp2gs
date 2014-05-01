@@ -32,8 +32,8 @@ class TestServerComms(TestCase):
 
     def test_get_group_info_from_address(self):
         smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.ok)
-        smtp2gs_servercomms.get_group_info_from_address('gstest',
-            'development@groupserver.org', 'token', True)
+        smtp2gs_servercomms.get_group_info_from_address('gstest', True,
+            'development@groupserver.org', 'token')
         self.assertEqual(1, smtp2gs_servercomms.post_multipart.call_count)
         args, kw_args = smtp2gs_servercomms.post_multipart.call_args
         self.assertEqual('gstest', args[0])
@@ -48,7 +48,7 @@ class TestServerComms(TestCase):
         smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.fail)
         self.assertRaises(smtp2gs_servercomms.NotOk,
             smtp2gs_servercomms.get_group_info_from_address,
-            'gstest', 'development@groupserver.org', 'token', True)
+            'gstest', True, 'development@groupserver.org', 'token')
 
     def test_add_post(self):
         hostname = 'gstest'
@@ -56,7 +56,7 @@ class TestServerComms(TestCase):
         message = b'I am a fish'  # Note: a byte-string
         token = 'token'
         smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.ok)
-        smtp2gs_servercomms.add_post(hostname, group, message, token, True)
+        smtp2gs_servercomms.add_post(hostname, True, group, message, token)
         self.assertEqual(1, smtp2gs_servercomms.post_multipart.call_count)
         args, kw_args = smtp2gs_servercomms.post_multipart.call_args
         self.assertEqual(hostname, args[0])
@@ -72,7 +72,7 @@ class TestServerComms(TestCase):
         smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.fail)
         self.assertRaises(smtp2gs_servercomms.NotOk,
             smtp2gs_servercomms.add_post,
-            'gstest', 'development', b'I am a fish', 'token', True)
+            'gstest', True, 'development', b'I am a fish', 'token')
 
     def test_add_bounce(self):
         hostname = 'gstest'
@@ -80,8 +80,8 @@ class TestServerComms(TestCase):
         groupEmail = 'development@groupserver.org'
         token = 'token'
         smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.ok)
-        smtp2gs_servercomms.add_bounce(hostname, userEmail, groupEmail, token,
-                                        True)
+        smtp2gs_servercomms.add_bounce(hostname, True, userEmail, groupEmail,
+                                        token)
         self.assertEqual(1, smtp2gs_servercomms.post_multipart.call_count)
         args, kw_args = smtp2gs_servercomms.post_multipart.call_args
         self.assertEqual(hostname, args[0])
@@ -99,4 +99,4 @@ class TestServerComms(TestCase):
         groupEmail = 'development@groupserver.org'
         self.assertRaises(smtp2gs_servercomms.NotOk,
             smtp2gs_servercomms.add_bounce,
-            'gstest', userEmail, groupEmail, 'token', True)
+            'gstest', True, userEmail, groupEmail, 'token')

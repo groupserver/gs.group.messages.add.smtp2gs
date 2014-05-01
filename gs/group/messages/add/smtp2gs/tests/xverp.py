@@ -34,11 +34,11 @@ class TestXVERP(TestCase):
 
     def test_handle_bounce(self):
         smtp2gs_xverp.add_bounce = MagicMock()
-        handle_bounce('gstest', self.xverpAddr, 'token', True)
+        handle_bounce('gstest', True, self.xverpAddr, 'token')
         self.assertEqual(1, smtp2gs_xverp.add_bounce.call_count)
         args, kw_args = smtp2gs_xverp.add_bounce.call_args
         self.assertEqual('gstest', args[0])
-        self.assertEqual('mpj17@onlinegroups.net', args[1])
-        self.assertEqual('development@groupserver.org', args[2])
-        self.assertEqual('token', args[3])
-        self.assertTrue(args[4])
+        self.assertTrue(args[1])
+        self.assertEqual('mpj17@onlinegroups.net', args[2])
+        self.assertEqual('development@groupserver.org', args[3])
+        self.assertEqual('token', args[4])
