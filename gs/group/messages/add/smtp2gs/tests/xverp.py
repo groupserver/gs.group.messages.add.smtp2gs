@@ -21,18 +21,23 @@ import gs.group.messages.add.smtp2gs.xverp as smtp2gs_xverp
 
 
 class TestXVERP(TestCase):
+    'Tests for XVERP handling'
     xverpAddr = 'development+mpj17=onlinegroups.net@groupserver.org'
 
     def test_is_xverp(self):
+        'Test that an XVERP address is seen as an XVERP address'
         r = is_an_xverp_bounce(self.xverpAddr)
         self.assertTrue(r)
 
     def test_isnt_xverp(self):
+        '''Test that an ordinary address is seen as an ordinary address, rather
+        than an XVERP address'''
         addr = 'development@groupsverver.org'
         r = is_an_xverp_bounce(addr)
         self.assertFalse(r)
 
     def test_handle_bounce(self):
+        'Test the call to handle_bounce'
         smtp2gs_xverp.add_bounce = MagicMock()
         handle_bounce('gstest', True, self.xverpAddr, 'token')
         self.assertEqual(1, smtp2gs_xverp.add_bounce.call_count)

@@ -21,6 +21,7 @@ import gs.group.messages.add.smtp2gs.servercomms as smtp2gs_servercomms
 
 
 class TestServerComms(TestCase):
+    'Tests for server communications.'
     def setUp(self):
         pageContent = to_json({'foo': 'bar'})
         self.ok = (smtp2gs_servercomms.HTTP_OK, 'Ok', pageContent)
@@ -31,6 +32,7 @@ class TestServerComms(TestCase):
         self.assertEqual(fields[fieldId], expected)
 
     def test_get_group_info_from_address(self):
+        'Test the call to get_group_info_from_address'
         smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.ok)
         smtp2gs_servercomms.get_group_info_from_address('gstest', True,
             'development@groupserver.org', 'token')
@@ -45,12 +47,14 @@ class TestServerComms(TestCase):
         self.assertTrue(kw_args['usessl'])
 
     def test_get_group_info_from_address_fail(self):
+        'Test a communications issue with get_group_info_from_address'
         smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.fail)
         self.assertRaises(smtp2gs_servercomms.NotOk,
             smtp2gs_servercomms.get_group_info_from_address,
             'gstest', True, 'development@groupserver.org', 'token')
 
     def test_add_post(self):
+        'Test adding a post'
         hostname = 'gstest'
         group = 'development'
         message = b'I am a fish'  # Note: a byte-string
@@ -69,12 +73,14 @@ class TestServerComms(TestCase):
         self.assertTrue(kw_args['usessl'])
 
     def test_add_post_fail(self):
+        'Test a communications issue with adding a post.'
         smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.fail)
         self.assertRaises(smtp2gs_servercomms.NotOk,
             smtp2gs_servercomms.add_post,
             'gstest', True, 'development', b'I am a fish', 'token')
 
     def test_add_bounce(self):
+        'Test recording a bounce.'
         hostname = 'gstest'
         userEmail = 'mpj17@onlinegroups.net'
         groupEmail = 'development@groupserver.org'
@@ -94,6 +100,7 @@ class TestServerComms(TestCase):
         self.assertTrue(kw_args['usessl'])
 
     def test_add_bounce_fail(self):
+        'Test a communications issue with adding a bounce'
         smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.fail)
         userEmail = 'mpj17@onlinegroups.net'
         groupEmail = 'development@groupserver.org'

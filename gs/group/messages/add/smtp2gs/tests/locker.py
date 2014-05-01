@@ -23,7 +23,7 @@ import gs.group.messages.add.smtp2gs.locker as smtp2gs_locker
 
 
 class TestLocker(TestCase):
-
+    '''Test the file-locking code'''
     def setUp(self):
         self.oldLockName = smtp2gs_locker.LOCK_NAME
         self.oldBreakLockTimeout = smtp2gs_locker.BREAK_LOCK_AGE
@@ -47,11 +47,13 @@ class TestLocker(TestCase):
         smtp2gs_locker.MAX_LOCK_TIMEOUT = self.maxLockTimeout
 
     def test_create_file(self):
+        'Test the call to create_file'
         smtp2gs_locker.create_file(smtp2gs_locker.LOCK_NAME)
         s = stat(smtp2gs_locker.LOCK_NAME)
         self.assertEqual(s.st_size, 82)
 
     def test_age(self):
+        'Test the function that gets the age of a file'
         smtp2gs_locker.create_file(smtp2gs_locker.LOCK_NAME)
         a = smtp2gs_locker.age(smtp2gs_locker.LOCK_NAME)
         self.assertGreaterEqual(a, 0)
@@ -62,8 +64,8 @@ class TestLocker(TestCase):
         self.assertTrue(lock.i_am_locking())
 
     def test_get_lock_new_lock_not_locked(self):
-        '''Test that a second process will not gain the lock, but it will
-        time-out waiting for the lock, and end up with nothing.'''
+        '''Test that a second process will not gain the lock,
+        but it will time-out waiting for the lock, and end up with nothing.'''
         # --=mpj17=-- Using timeouts ain't pretty, but it works for 22:33.
         smtp2gs_locker.MAX_LOCK_TIMEOUT = 2  # seconds
 
@@ -114,6 +116,8 @@ class TestLocker(TestCase):
 
 
 def get_lock(t):
-    # Pretend to be a badly behaved subprocess.
+    '''A function that pretends to be a badly behaved subprocess
+
+    :param int t: Time to sleep with the lock acquired (seconds)'''
     smtp2gs_locker.get_lock()
     sleep(t)
