@@ -17,7 +17,8 @@ from unittest import TestSuite, main as unittest_main
 from gs.group.messages.add.smtp2gs.tests.xverp import TestXVERP
 from gs.group.messages.add.smtp2gs.tests.servercomms import TestServerComms
 from gs.group.messages.add.smtp2gs.tests.locker import TestLocker
-testCases = (TestXVERP, TestServerComms, TestLocker)
+from gs.group.messages.add.smtp2gs.tests.script import TestScript
+testCases = (TestXVERP, TestServerComms, TestLocker, TestScript)
 
 
 def load_tests(loader, tests, pattern):
