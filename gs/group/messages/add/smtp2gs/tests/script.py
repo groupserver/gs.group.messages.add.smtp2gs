@@ -15,7 +15,8 @@
 from __future__ import absolute_import, unicode_literals
 from unittest import TestCase
 from mock import MagicMock
-from gs.group.messages.add.smtp2gs.script import (get_token_from_config)
+from gs.group.messages.add.smtp2gs.script import (get_token_from_config,
+    cleanup_lock)
 import gs.group.messages.add.smtp2gs.script as gsscript
 
 
@@ -28,7 +29,14 @@ class TestScript(TestCase):
         gsscript.Config.get = MagicMock(return_value={'token': self.tokenValue})
         gsscript.sys.exit = MagicMock()
 
+        gsscript.lock = MagicMock()
+        self.oldWeLocked = gsscript.weLocked
+
+    def tearDown(self):
+        gsscript.weLocked = self.oldWeLocked
+
     def test_get_token_from_config(self):
+        'Test that we get the token from the config'
         r = get_token_from_config('default', 'gsconfig.ini')
         self.assertEqual(self.tokenValue, r)
         self.assertEqual(1, gsscript.Config.__init__.call_count)
@@ -37,3 +45,15 @@ class TestScript(TestCase):
         args, kw_args = gsscript.Config.__init__.call_args
         self.assertEqual('default', args[0])
         self.assertEqual('gsconfig.ini', args[1])
+
+    def test_cleanup_lock_unlock(self):
+        'Test that cleanup_lock unlocks when it should'
+        gsscript.weLocked = True
+        cleanup_lock()
+        self.assertEqual(1, gsscript.lock.release.call_count)
+
+    def test_cleanup_lock_untouched(self):
+        'Test that cleanup_lock leaves the lock locked when it should'
+        gsscript.weLocked = False
+        cleanup_lock()
+        self.assertEqual(0, gsscript.lock.release.call_count)
