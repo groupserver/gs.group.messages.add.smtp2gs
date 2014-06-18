@@ -56,6 +56,8 @@ script with the same arguments again later.
     if lock.i_am_locking():
         # Do stuff.
 '''
+    # TODO: Use Redis for the locking
+    # (We have the config for Redis in the config file)
 
     create_file(LOCK_NAME)
     # The following is a modification of the example from the lockfile
