@@ -13,6 +13,7 @@
 #
 ##############################################################################
 from __future__ import absolute_import, unicode_literals
+from mock import patch
 from multiprocessing import Process
 from os import remove, stat
 from tempfile import NamedTemporaryFile
@@ -46,6 +47,12 @@ class TestLocker(TestCase):
         smtp2gs_locker.BREAK_LOCK_AGE = self.oldBreakLockTimeout
         smtp2gs_locker.MAX_LOCK_TIMEOUT = self.maxLockTimeout
 
+    def assertLocking(self, lock):
+        self.assertTrue(lock.i_am_locking(), 'Not locking')
+
+    def assertUnlocked(self, lock):
+        self.assertFalse(lock.i_am_locking(), 'Locking')
+
     def test_create_file(self):
         'Test the call to create_file'
         smtp2gs_locker.create_file(smtp2gs_locker.LOCK_NAME)
@@ -61,7 +68,7 @@ class TestLocker(TestCase):
     def test_get_lock_new_lock_locked(self):
         '''Test that a new process will acquire a lock'''
         lock = smtp2gs_locker.get_lock()
-        self.assertTrue(lock.i_am_locking())
+        self.assertLocking(lock)
 
     def test_get_lock_new_lock_not_locked(self):
         '''Test that a second process will not gain the lock,
@@ -82,7 +89,7 @@ class TestLocker(TestCase):
         t2 = time()
 
         # Assert that we have not got the lock
-        self.assertFalse(l2.i_am_locking())
+        self.assertUnlocked(l2)
         diff = t2 - t1
         # Assert that we waited the correct amount of time.
         self.assertGreaterEqual(diff, smtp2gs_locker.MAX_LOCK_TIMEOUT)
@@ -109,7 +116,7 @@ class TestLocker(TestCase):
         l2 = smtp2gs_locker.get_lock()
 
         # Assert that we have the lock, because the lock has been broken
-        self.assertTrue(l2.i_am_locking())
+        self.assertLocking(l2)
 
         # Wait for the badly behaved subprocess
         p.join()
