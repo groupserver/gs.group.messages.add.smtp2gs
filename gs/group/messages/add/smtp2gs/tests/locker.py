@@ -142,6 +142,22 @@ of Iris Pahu who reported the error and provided the excellent error message.'''
             self.assertRaises(ValueError, smtp2gs_locker.age,
                                             (smtp2gs_locker.LOCK_NAME,))
 
+    def test_iris_pahu_actual_lock(self):
+        'An acutal concurrency test.'
+        with patch('gs.group.messages.add.smtp2gs.locker.getmtime') as pgmt:
+            # Ensure that getmtime returns an OSError
+            pgmt.side_effect = OSError('This is an error')
+            t = 3  # seconds
+            p = Process(target=get_lock, args=(t, ))
+            p.start()
+
+            a = smtp2gs_locker.age(smtp2gs_locker.LOCK_NAME)
+            l = smtp2gs_locker.get_lock()
+
+        self.assertEqual(1, a, 'Age is {0}, not 1'.format(a))
+        self.assertLocking(l)
+        p.join()
+
 
 def get_lock(t):
     '''A function that pretends to be a badly behaved subprocess
