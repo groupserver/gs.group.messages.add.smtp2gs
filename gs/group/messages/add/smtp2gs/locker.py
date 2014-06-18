@@ -94,7 +94,17 @@ def age(fileName):
     :return: The age of the file, in seconds.
     :rtype: ``int``
 '''
-    mTime = getmtime(fileName)
+    try:
+        mTime = getmtime(fileName)
+    except OSError:
+        # --=mpj17=-- It is rare, but possible, for a lock to be released
+        # in between doing the ``isfile`` in ``get_lock`` and doing
+        # ``getmtime`` in this function. If this happens getmtime will raise
+        # an OSError. If we return a ``1`` from this method then we will either
+        #   1.  Acquire a lock, or
+        #   2.  Wait for a bit longer.
+        # Neither is the end of the world.
+        mTime = 1
     retval = time() - mTime
     assert retval >= 0
     return retval
