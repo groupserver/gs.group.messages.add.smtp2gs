@@ -104,7 +104,8 @@ def age(fileName):
         #   1.  Acquire a lock, or
         #   2.  Wait for a bit longer.
         # Neither is the end of the world.
-        mTime = 1
-    retval = time() - mTime
+        retval = 1
+    else:
+        retval = time() - mTime
     assert retval >= 0
     return retval

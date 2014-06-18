@@ -121,6 +121,27 @@ class TestLocker(TestCase):
         # Wait for the badly behaved subprocess
         p.join()
 
+    def test_iris_pahu(self):
+        '''Test for a race condition
+
+There is a race condition where another process can delete the lock-file
+between the file-exists test and the age test This function is named in honour
+of Iris Pahu who reported the error and provided the excellent error message.'''
+
+        with patch('gs.group.messages.add.smtp2gs.locker.getmtime') as pgmt:
+            # Ensure that getmtime returns an OSError
+            pgmt.side_effect = OSError('This is an error')
+            a = smtp2gs_locker.age(smtp2gs_locker.LOCK_NAME)
+        self.assertEqual(1, a, 'Age is {0}, not 1'.format(a))
+
+    def test_iris_pahu_other_error(self):
+        '''Test that errors other than OSError are actually raised'''
+        with patch('gs.group.messages.add.smtp2gs.locker.getmtime') as pgmt:
+            # Ensure that getmtime returns an OSError
+            pgmt.side_effect = ValueError('This is an error')
+            self.assertRaises(ValueError, smtp2gs_locker.age,
+                                            (smtp2gs_locker.LOCK_NAME,))
+
 
 def get_lock(t):
     '''A function that pretends to be a badly behaved subprocess
