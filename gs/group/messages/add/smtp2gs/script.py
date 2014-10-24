@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''The core code for the ``smtp2gs`` script.'''
-##############################################################################
+############################################################################
 #
 # Copyright © 2014 OnlineGroups.net and Contributors.
 # All Rights Reserved.
@@ -12,7 +12,7 @@
 # WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
 # FOR A PARTICULAR PURPOSE.
 #
-##############################################################################
+############################################################################
 from __future__ import absolute_import, unicode_literals
 # Standard modules
 import atexit
@@ -48,22 +48,24 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token):
 
 :param str progName: The name of the current program (for error messages)
 :param str url: The URL for the host to connect to.
-:param str listId: The identifier for the list (group) to add the group to. If
-                   set to None or '' then the ``x-original-to`` header will be
-                   examined to determine the email address which is used to
-                   look up the ID of the group.
-:param str emailMessage: The entire email message to add (including the header)
+:param str listId: The identifier for the list (group) to add the group to.
+                   If set to None or '' then the ``x-original-to`` header
+                   will be examined to determine the email address which is
+                   used to look up the ID of the group.
+:param str emailMessage: The entire email message to add (including the
+                         header)
 :param str token: The authentiation token to pass to GroupServer.
 :return: Nothing. :func:`sys.exit` may be called to terminate the program if
-                  there is a problem, returning a value from :mod:`.errorvals`.
+                  there is a problem, returning a value from
+                  :mod:`.errorvals`.
 
 The :func:`add_post_to_groupserver` function is the core of the ``smtp2gs``
 script. It checks that the email is valid (using the :mod:`email` module),
 ensures it is not a bounce (:mod:`.xverp`), gathers information about the
 group, and finally adds the post (:mod:`.servercomms`).
 '''
-    # WARNING: multiple exit points below thanks to "sys.exit" calls. Dijkstra
-    # will hate me for this.
+    # WARNING: multiple exit points below thanks to "sys.exit" calls.
+    # Dijkstra will hate me for this.
 
     # First, get the lock or die!!
     global weLocked, lock
@@ -115,8 +117,8 @@ def cleanup_lock():
     '''Unlock the file lock.
 
 The :func:`cleanup_lock` method is decorated with :func:`atexit.register` so
-it is always called. However, it only unlocks the lock if (and only if) it is
-the process responsible for locking the lock.
+it is always called. However, it only unlocks the lock if (and only if) it
+is the process responsible for locking the lock.
 '''
     global weLocked, lock
     if weLocked:
@@ -140,8 +142,8 @@ def get_token_from_config(configSet, configFileName):
 
 :param str configSet: The name of the configuration set to look up (see
                       :class:`gs.config.Config`)
-:param str configFileName: The name of the configuration file that contains the
-token.
+:param str configFileName: The name of the configuration file that contains
+                           the token.
 :return: The authentication token for ``configSet`` in ``configFileName``
 :rtype: ``str``
 :raises ValueError: The token was not present in ``configSet``.
@@ -159,7 +161,8 @@ token.
 def main(configFileName='etc/gsconfig.ini'):
     '''The main function in the ``smtp2gs`` script
 
-:param str configFileName: The name of the configuration file for GroupServer.
+:param str configFileName: The name of the configuration file for
+                           GroupServer.
 :return: Nothing. :func:`sys.exit` is called with one of the values from
                   :mod:`.errorvals`.
 
