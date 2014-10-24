@@ -1,6 +1,14 @@
 Changelog
 =========
 
+2.1.2 (2014-10-24)
+------------------
+
+* Switching to GitHub_ as the primary code repository, naming the
+  reStructuredText files as such.
+
+.. _GitHub: https://github.com/groupserver/gs.group.messages.add.smtp2gs
+
 2.1.1 (2014-06-18)
 ------------------
 
@@ -41,3 +49,5 @@ Changelog
 
 * Initial version, based on a script in
   ``XWFMailingListManager``.
+
+..  LocalWords:  Changelog GitHub
