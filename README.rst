@@ -7,7 +7,7 @@ Add a message to GroupServer from an SMTP server
 
 :Author: `Michael JasonSmith`_
 :Contact: Michael JasonSmith <mpj17@onlinegroups.net>
-:Date: 2013-08-27
+:Date: 2013-10-22
 :Organization: `GroupServer.org`_
 :Copyright: This document is licensed under a
   `Creative Commons Attribution-Share Alike 3.0 New Zealand License`_
@@ -222,7 +222,7 @@ URLs) that are supported by the same database::
 Resources
 =========
 
-- Code repository: https://source.iopen.net/groupserver/gs.group.messages.add.smtp2gs
+- Code repository: https://github.com/groupserver/gs.group.messages.add.smtp2gs
 - Questions and comments to http://groupserver.org/groups/development
 - Report bugs at https://redmine.iopen.net/projects/groupserver
 
@@ -234,15 +234,15 @@ Resources
    http://creativecommons.org/licenses/by-sa/3.0/nz/
 .. [#entryPoint] See `Feature 3539 <https://redmine.iopen.net/issues/3539>`_
 .. [#rfc3463] `RFC 3463: Enhanced Mail System Status Codes 
-             <http://tools.ietf.org/html/rfc3463>`_
+              <http://tools.ietf.org/html/rfc3463>`_
 .. [#add] See ``gs.group.messages.add.base`` 
-            <https://source.iopen.net/groupserver/gs.group.messages.add.base/summary>
+          <https://github.com/groupserver/gs.group.messages.add.base>
 .. [#form] See ``gs.form`` 
-            <https://source.iopen.net/groupserver/gs.form/summary>
+           <https://github.com/groupserver/gs.form>
 .. [#auth] See ``gs.auth.token`` 
-            <https://source.iopen.net/groupserver/gs.auth.token/summary>
+           <https://github.com/groupserver/gs.auth.token>
 .. [#config] See ``gs.config`` 
-            <https://source.iopen.net/groupserver/gs.config/summary>
+             <https://github.com/groupserver/gs.config>
 
 ..  LocalWords:  CONFIG config theValueOfTheDefaultToken smtp entryPoint
 ..  LocalWords:  MAXSIZE LISTID MiB tmp theValueOfTheToken firstSite nz
