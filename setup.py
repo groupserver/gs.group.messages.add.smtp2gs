@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-##############################################################################
+############################################################################
 #
-# Copyright © 2014 OnlineGroups.net and Contributors.
+# Copyright © 2012, 2013, 2014, 2015 OnlineGroups.net and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -11,7 +11,7 @@
 # WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
 # FOR A PARTICULAR PURPOSE.
 #
-##############################################################################
+############################################################################
 import codecs
 import os
 import sys
@@ -32,10 +32,12 @@ else:
 
 with codecs.open('README.rst', encoding='utf-8') as f:
     long_description = f.read()
-with codecs.open(os.path.join("docs", "HISTORY.rst"), encoding='utf-8') as f:
+with codecs.open(os.path.join("docs", "HISTORY.rst"),
+                 encoding='utf-8') as f:
     long_description += '\n' + f.read()
 
-setup(name='gs.group.messages.add.smtp2gs',
+setup(
+    name='gs.group.messages.add.smtp2gs',
     version=version,
     description="The console script for adding a message to GroupServer.",
     long_description=long_description,
@@ -58,7 +60,7 @@ setup(name='gs.group.messages.add.smtp2gs',
         'Topic :: Communications :: Email :: Mailing List Servers',
         'Topic :: Communications :: Email :: Mail Transport Agents',
         "Topic :: Software Development :: Libraries :: Python Modules",
-      ],
+    ],
     keywords='groupserver, message, post, email, smtp, postfix',
     author='Michael JasonSmith',
     author_email='mpj17@onlinegroups.net',
@@ -71,7 +73,7 @@ setup(name='gs.group.messages.add.smtp2gs',
     zip_safe=False,
     install_requires=requires,
     tests_require=['mock', ],
-    test_suite="gs.group.messages.add.smtp2gs.test.test_all",
+    test_suite="gs.group.messages.add.smtp2gs.tests.test_all",
     extras_require={'docs': ['Sphinx'], },
     entry_points={
         'console_scripts': [
