@@ -1,6 +1,13 @@
 Changelog
 =========
 
+2.1.3 (2015-02-12)
+------------------
+
+* Adding the documentation to `Read the Docs`_
+
+.. _Read the Docs: 
+
 2.1.2 (2014-10-24)
 ------------------
 
