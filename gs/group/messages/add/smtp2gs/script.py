@@ -2,7 +2,7 @@
 '''The core code for the ``smtp2gs`` script.'''
 ############################################################################
 #
-# Copyright © 2014 OnlineGroups.net and Contributors.
+# Copyright © 2014, 2015 OnlineGroups.net and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -25,7 +25,6 @@ else:
     from urllib.parse import urlparse  # lint:ok
 # GroupServer modules
 from gs.config import Config, ConfigError
-from gs.profile.email.relay.relayer import RELAY_ADDRESS_PREFIX
 # Local modules
 from .errorvals import exit_vals
 from .getargs import get_args
@@ -45,7 +44,8 @@ lock = None
 # alteration to the configuration then a 4.x.x error will be returned.
 
 
-def add_post_to_groupserver(progName, url, listId, emailMessage, token):
+def add_post_to_groupserver(progName, url, listId, emailMessage, token,
+                            relayAddressPrefix):
     '''Add a post to a GroupServer group.
 
 :param str progName: The name of the current program (for error messages)
@@ -89,7 +89,7 @@ group, and finally adds the post (:mod:`.servercomms`).
     email = message_from_string(emailMessage)
 
     to = email['To']
-    if (to.startswith(RELAY_ADDRESS_PREFIX)):
+    if (to.startswith(relayAddressPrefix)):
         relay_email(netloc, usessl, emailMessage, token)
         sys.exit(exit_vals['success'])
 
@@ -166,6 +166,26 @@ def get_token_from_config(configSet, configFileName):
     return retval
 
 
+def get_relay_address_prefix_from_config(configSet, configFileName):
+    '''Get the prefix used to mark email addresses to relay from the config.
+
+:param str configSet: The name of the configuration set to look up (see
+                      :class:`gs.config.Config`)
+:param str configFileName: The name of the configuration file that contains
+                           the token.
+:return: The address prefix for ``configSet`` in ``configFileName``, or 'p-'
+         if absent.
+:rtype: ``str``
+'''
+    config = Config(configSet, configFileName)
+    config.set_schema('smtp', {'relay-address-prefix': str})
+    ws = config.get('smtp')
+    retval = ws['relay-address-prefix']
+    if not retval:
+        retval = 'p-'
+    return retval
+
+
 def main(configFileName='etc/gsconfig.ini'):
     '''The main function in the ``smtp2gs`` script
 
@@ -187,6 +207,9 @@ authentication token, opens the email message, and then calls
         sys.stderr.write(m)
         sys.exit(exit_vals['config_error'])
 
+    relayAddressPrefix = get_relay_address_prefix_from_config(
+        args.instance, args.config)
+
     emailMessage = args.file.read()
     args.file.close()
     l = len(emailMessage)
@@ -202,7 +225,7 @@ authentication token, opens the email message, and then calls
 
     try:
         add_post_to_groupserver(sys.argv[0], args.url, args.listId,
-                                emailMessage, token)
+                                emailMessage, token, relayAddressPrefix)
     except gaierror as g:
         m = '4.4.4 Error connecting to the server while processing '\
             'the message:\n%s\n' % (g)
