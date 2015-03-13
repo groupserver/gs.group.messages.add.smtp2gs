@@ -79,6 +79,32 @@ class TestServerComms(TestCase):
             smtp2gs_servercomms.add_post,
             'gstest', True, 'development', b'I am a fish', 'token')
 
+    def test_relay_email(self):
+        'Test relaying a message through GroupServer'
+        hostname = 'gstest'
+        userEmail = 'p-id12345@gstest'
+        message = b'I am a fish'  # Note: a byte-string
+        token = 'token'
+        token = 'token'
+        smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.ok)
+        smtp2gs_servercomms.relay_email(hostname, True, message, token)
+        self.assertEqual(1, smtp2gs_servercomms.post_multipart.call_count)
+        args, kw_args = smtp2gs_servercomms.post_multipart.call_args
+        self.assertEqual(hostname, args[0])
+        self.assertEqual(smtp2gs_servercomms.RELAY_EMAIL_URI, args[1])
+        fields = args[2]
+        self.check_field(fields, 'form.token', token)
+        self.check_field(fields, 'form.emailMessage', b64encode(message))
+        self.assertIn('form.actions.relay', fields)
+        self.assertTrue(kw_args['usessl'])
+
+    def test_relay_email_fail(self):
+        'Test a communications issue with relaying a message.'
+        smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.fail)
+        self.assertRaises(smtp2gs_servercomms.NotOk,
+            smtp2gs_servercomms.relay_email,
+            'gstest', True, b'I am a fish', 'token')
+
     def test_add_bounce(self):
         'Test recording a bounce.'
         hostname = 'gstest'

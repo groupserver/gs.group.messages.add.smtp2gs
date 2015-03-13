@@ -25,11 +25,13 @@ else:
     from urllib.parse import urlparse  # lint:ok
 # GroupServer modules
 from gs.config import Config, ConfigError
+from gs.profile.email.relay.relayer import RELAY_ADDRESS_PREFIX
 # Local modules
 from .errorvals import exit_vals
 from .getargs import get_args
 from .locker import get_lock
-from .servercomms import get_group_info_from_address, NotOk, add_post
+from .servercomms import (get_group_info_from_address, NotOk, add_post,
+                          relay_email)
 from .xverp import is_an_xverp_bounce, handle_bounce
 
 #: ``True`` if the current process is responsible for locking.
@@ -85,6 +87,12 @@ group, and finally adds the post (:mod:`.servercomms`).
     usessl = parsedUrl.scheme == 'https'
 
     email = message_from_string(emailMessage)
+
+    to = email['To']
+    if (to.startswith(RELAY_ADDRESS_PREFIX)):
+        relay_email(netloc, usessl, emailMessage, token)
+        sys.exit(exit_vals['success'])
+
     xOriginalTo = email['x-original-to']
     if ((xOriginalTo is None) and (not listId)):
         m = '5.1.3 No "x-original-to" header in the email message.\n'

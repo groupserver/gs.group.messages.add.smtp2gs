@@ -24,7 +24,8 @@ version = get_version()
 core = ['setuptools',
         'lockfile',
         'gs.config',  # Note: without zope-support
-        'gs.form', ]
+        'gs.form', 
+        'gs.profile.email.relay',]
 if sys.version_info > (2, 6):
     requires = core
 else:

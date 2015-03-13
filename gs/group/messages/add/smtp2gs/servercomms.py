@@ -95,6 +95,39 @@ message is base-64 encoded (see :func:`base64.b64encode`) before being sent.
         raise NotOk('%s (%d <%s>)' % (reason, status, netloc))
 
 
+#: The URI that is used to relay an email message to a user.
+RELAY_EMAIL_URI = '/gs-profile-email-relay.html'
+
+
+def relay_email(netloc, usessl, emailMessage, token):
+    '''Add a post to a GroupServer Group.
+
+:param str netloc: The name of the GroupServer host to relay the message
+                   through.
+:param bool usessl: ``True`` if TLS should be used to communicate with the
+                    server.
+:param str emailMessage: The entire email message to relay.
+:param str token: The authentication token to pass to GroupServer.
+:raises NotOk: If the server (``hostname``) responds with something
+               other than ``200``
+:return: Nothing.
+
+Relay an email message to a user through GroupServer, by sending the parameters
+to :const:`RELAY_EMAIL_URI`. The message is base-64 encoded (see 
+:func:`base64.b64encode`) before being sent.
+'''
+    # we do this to ensure we have no problems with attachments
+    emailMessage = b64encode(emailMessage)
+    fields = {'form.emailMessage': emailMessage,
+              'form.token': token, 'form.actions.relay': 'Relay'}
+    status, reason, data = post_multipart(netloc, RELAY_EMAIL_URI,
+                                          fields, usessl=usessl)
+    if status != HTTP_OK:
+        raise NotOk('%s (%d <%s>)' % (reason, status, netloc))
+
+
+
+
 #: The URI that is used to record an XVERP bounce.
 BOUNCE_URI = '/gs-group-member-bounce.html'
 
