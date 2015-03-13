@@ -57,6 +57,9 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token,
 :param str emailMessage: The entire email message to add (including the
                          header)
 :param str token: The authentiation token to pass to GroupServer.
+:param str relayAddressPrefix: The email-address prefix that shows that the
+                               message should be forwarded on to a
+                               group-member, rather than added to a group.
 :return: Nothing. :func:`sys.exit` may be called to terminate the program if
                   there is a problem, returning a value from
                   :mod:`.errorvals`.
