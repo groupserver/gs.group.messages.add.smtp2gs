@@ -1,6 +1,14 @@
 Changelog
 =========
 
+3.0.0 (2015-03-13)
+------------------
+
+* Relaying on email messages to group members, closing `Feature
+  4106`_
+
+.. _Feature 4106: https://redmine.iopen.net/issues/4106
+
 2.1.3 (2015-02-12)
 ------------------
 

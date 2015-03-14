@@ -51,7 +51,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'gs.group.messages.add.smtp2gs'
-copyright = u'2014, GroupServer.org'
+copyright = u'2015, GroupServer.org'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
