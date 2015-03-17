@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.0.0 (2015-03-13)
+3.0.0 (2015-03-17)
 ------------------
 
 * Relaying on email messages to group members, closing `Feature
