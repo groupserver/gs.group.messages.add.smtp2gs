@@ -69,8 +69,7 @@ class TestScript(TestCase):
 
     def test_get_relay_address_prefix_from_config_missing(self):
         'Test that we get "p-" when the prefix is missing'
-        gsscript.Config.get = MagicMock(
-            return_value={'relay-address-prefix': None})
+        gsscript.Config.get = MagicMock(return_value={})
         r = get_relay_address_prefix_from_config('default', 'gsconfig.ini')
         self.assertEqual('p-', r)
 

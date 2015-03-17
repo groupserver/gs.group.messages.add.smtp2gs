@@ -17,6 +17,7 @@ from __future__ import absolute_import, unicode_literals
 # Standard modules
 import atexit
 from email import message_from_string
+from email.utils import parseaddr
 from socket import gaierror
 import sys
 if (sys.version_info < (3, )):
@@ -91,7 +92,7 @@ group, and finally adds the post (:mod:`.servercomms`).
 
     email = message_from_string(emailMessage)
 
-    to = email['To']
+    to = parseaddr(email['To'])[1]
     if (to.startswith(relayAddressPrefix)):
         relay_email(netloc, usessl, emailMessage, token)
         sys.exit(exit_vals['success'])
@@ -182,10 +183,8 @@ def get_relay_address_prefix_from_config(configSet, configFileName):
 '''
     config = Config(configSet, configFileName)
     config.set_schema('smtp', {'relay-address-prefix': str})
-    ws = config.get('smtp')
-    retval = ws['relay-address-prefix']
-    if not retval:
-        retval = 'p-'
+    ws = config.get('smtp', strict=False)
+    retval = ws.get('relay-address-prefix', 'p-')
     return retval
 
 
