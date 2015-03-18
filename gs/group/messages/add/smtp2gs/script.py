@@ -17,7 +17,6 @@ from __future__ import absolute_import, unicode_literals
 # Standard modules
 import atexit
 from email import message_from_string
-from email.utils import parseaddr
 from socket import gaierror
 import sys
 if (sys.version_info < (3, )):
@@ -92,16 +91,15 @@ group, and finally adds the post (:mod:`.servercomms`).
 
     email = message_from_string(emailMessage)
 
-    to = parseaddr(email['To'])[1]
-    if (to.startswith(relayAddressPrefix)):
-        relay_email(netloc, usessl, emailMessage, token)
-        sys.exit(exit_vals['success'])
-
     xOriginalTo = email['x-original-to']
     if ((xOriginalTo is None) and (not listId)):
         m = '5.1.3 No "x-original-to" header in the email message.\n'
         sys.stderr.write(m)
         sys.exit(exit_vals['no_x_original_to'])
+
+    if (xOriginalTo.startswith(relayAddressPrefix)):
+        relay_email(netloc, usessl, emailMessage, token)
+        sys.exit(exit_vals['success'])
 
     if is_an_xverp_bounce(xOriginalTo):
         handle_bounce(netloc, usessl, xOriginalTo, token)
