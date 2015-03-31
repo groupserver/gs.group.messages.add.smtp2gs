@@ -51,18 +51,17 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token,
 :param str progName: The name of the current program (for error messages)
 :param str url: The URL for the host to connect to.
 :param str listId: The identifier for the list (group) to add the group to.
-                   If set to None or '' then the ``x-original-to`` header
-                   will be examined to determine the email address which is
-                   used to look up the ID of the group.
+    If set to None or '' then the ``x-original-to`` header will be examined
+    to determine the email address which is used to look up the ID of the
+    group.
 :param str emailMessage: The entire email message to add (including the
                          header)
 :param str token: The authentiation token to pass to GroupServer.
 :param str relayAddressPrefix: The email-address prefix that shows that the
-                               message should be forwarded on to a
-                               group-member, rather than added to a group.
+    message should be forwarded on to a group-member, rather than added to a
+    group.
 :return: Nothing. :func:`sys.exit` may be called to terminate the program if
-                  there is a problem, returning a value from
-                  :mod:`.errorvals`.
+    there is a problem, returning a value from :mod:`.errorvals`.
 
 The :func:`add_post_to_groupserver` function is the core of the ``smtp2gs``
 script. It checks that the email is valid (using the :mod:`email` module),
@@ -97,7 +96,7 @@ group, and finally adds the post (:mod:`.servercomms`).
         sys.stderr.write(m)
         sys.exit(exit_vals['no_x_original_to'])
 
-    if (xOriginalTo.startswith(relayAddressPrefix)):
+    if ((not listId) and xOriginalTo.startswith(relayAddressPrefix)):
         relay_email(netloc, usessl, emailMessage, token)
         sys.exit(exit_vals['success'])
 

@@ -14,10 +14,10 @@
 ############################################################################
 from __future__ import absolute_import, unicode_literals
 from unittest import TestCase
-from mock import MagicMock
+from mock import (MagicMock, patch)
 from gs.group.messages.add.smtp2gs.script import (
     get_token_from_config, get_relay_address_prefix_from_config,
-    cleanup_lock)
+    cleanup_lock, add_post_to_groupserver)
 import gs.group.messages.add.smtp2gs.script as gsscript
 
 
@@ -84,3 +84,32 @@ class TestScript(TestCase):
         gsscript.weLocked = False
         cleanup_lock()
         self.assertEqual(0, gsscript.lock.release.call_count)
+
+    @patch('gs.group.messages.add.smtp2gs.script.'
+           'get_group_info_from_address')
+    @patch('gs.group.messages.add.smtp2gs.script.add_post')
+    def test_no_relay_if_listid(self, m_add_post, m_ggi):
+        'Ensure we do not try and relay the message if the list ID is set'
+        m = b'''To: example-group@example.com
+From: a.member@people.example.com
+Subject: Violence
+
+Good evening.
+
+On Ethel the Frog tonight we look at violence: the violence of
+British Gangland.'''
+        add_post_to_groupserver(
+            progName='gs.group.messages.add.smtp2gs.tests.script',
+            url=b'http://groups.example.com',
+            listId=b'example-group',
+            emailMessage=m,
+            token=b'fake-token',
+            relayAddressPrefix='r-')
+
+        # We have a list-ID, so get_group_info_from_address should not be
+        # called
+        self.assertEqual(0, m_ggi.call_count)
+        m_add_post.assert_called_onced_with(
+            b'groups.example.com', False, b'example-group', m,
+            b'fake-token')
+        self.assertEqual(1, m_add_post.call_count)
