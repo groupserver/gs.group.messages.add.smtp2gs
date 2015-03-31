@@ -36,6 +36,14 @@ class TestXVERP(TestCase):
         r = is_an_xverp_bounce(addr)
         self.assertFalse(r)
 
+    def test_none(self):
+        r = is_an_xverp_bounce(None)
+        self.assertFalse(r)
+
+    def test_blank(self):
+        r = is_an_xverp_bounce(b'')
+        self.assertFalse(r)
+
     def test_handle_bounce(self):
         'Test the call to handle_bounce'
         smtp2gs_xverp.add_bounce = MagicMock()
