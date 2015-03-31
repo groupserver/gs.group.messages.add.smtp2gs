@@ -1,6 +1,21 @@
 Changelog
 =========
 
+3.0.1 (2015-03-30)
+------------------
+
+* Avoiding the relay code if the list-identifier is specified,
+  `thanks to Piers`_
+* Dropping `gs.profile.email.relay`_ from the product
+  dependencies: it does rely on it, but for the page rather than
+  for the code
+* Adding more unit tests
+
+.. _`thanks to Piers`:
+   http://groupserver.org/r/post/7KTJlimsOi1l8sKLiPsD3P
+.. _gs.profile.email.relay:
+   https://github.com/groupserver/gs.profile.email.relay
+
 3.0.0 (2015-03-17)
 ------------------
 
