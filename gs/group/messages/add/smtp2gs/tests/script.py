@@ -148,3 +148,28 @@ British Gangland.'''
         m_add_post.assert_called_onced_with(
             b'groups.example.com', False, b'example-group', m,
             b'fake-token')
+
+    @patch('gs.group.messages.add.smtp2gs.script.relay_email')
+    @patch('gs.group.messages.add.smtp2gs.script.'
+           'get_group_info_from_address')
+    @patch('gs.group.messages.add.smtp2gs.script.add_post')
+    def test_relay(self, m_add_post, m_ggi, m_relay_email):
+        m = b'''To: r-memberId@groups.example.com
+From: a.member@people.example.com
+Subject: Violence
+X-Original-To: z-memberId@groups.example.com
+
+Good evening.
+
+On Ethel the Frog tonight we look at violence: the violence of
+British Gangland.'''
+        add_post_to_groupserver(
+            progName='gs.group.messages.add.smtp2gs.tests.script',
+            url=b'http://groups.example.com',
+            listId=None,
+            emailMessage=m,
+            token=b'fake-token',
+            relayAddressPrefix='z-')
+
+        m_relay_email.assert_called_once_with(
+            b'groups.example.com', False, m, b'fake-token')
