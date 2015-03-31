@@ -90,7 +90,7 @@ class TestScript(TestCase):
     @patch('gs.group.messages.add.smtp2gs.script.add_post')
     def test_no_relay_if_listid(self, m_add_post, m_ggi):
         'Ensure we do not try and relay the message if the list ID is set'
-        m = b'''To: example-group@example.com
+        m = '''To: example-group@example.com
 From: a.member@people.example.com
 Subject: Violence
 
@@ -120,7 +120,7 @@ British Gangland.'''
         'Ensure we use the x-original-to if we lack a list-id'
         # The lack of the group address in any standard destination address
         # happens if BCC gets used.
-        m = b'''To: someone.else@others.example.com
+        m = '''To: someone.else@others.example.com
 From: a.member@people.example.com
 Subject: Violence
 X-Original-To: example-group@groups.example.com
@@ -154,7 +154,7 @@ British Gangland.'''
            'get_group_info_from_address')
     @patch('gs.group.messages.add.smtp2gs.script.add_post')
     def test_relay(self, m_add_post, m_ggi, m_relay_email):
-        m = b'''To: r-memberId@groups.example.com
+        m = '''To: r-memberId@groups.example.com
 From: a.member@people.example.com
 Subject: Violence
 X-Original-To: z-memberId@groups.example.com
