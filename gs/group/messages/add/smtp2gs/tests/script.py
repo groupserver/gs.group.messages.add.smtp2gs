@@ -112,4 +112,39 @@ British Gangland.'''
         m_add_post.assert_called_onced_with(
             b'groups.example.com', False, b'example-group', m,
             b'fake-token')
-        self.assertEqual(1, m_add_post.call_count)
+
+    @patch('gs.group.messages.add.smtp2gs.script.'
+           'get_group_info_from_address')
+    @patch('gs.group.messages.add.smtp2gs.script.add_post')
+    def test_orig_if_no_listid(self, m_add_post, m_ggi):
+        'Ensure we use the x-original-to if we lack a list-id'
+        # The lack of the group address in any standard destination address
+        # happens if BCC gets used.
+        m = b'''To: someone.else@others.example.com
+From: a.member@people.example.com
+Subject: Violence
+X-Original-To: example-group@groups.example.com
+
+Good evening.
+
+On Ethel the Frog tonight we look at violence: the violence of
+British Gangland.'''
+
+        m_ggi.return_value = {'groupId': 'example-group'}
+
+        add_post_to_groupserver(
+            progName='gs.group.messages.add.smtp2gs.tests.script',
+            url=b'http://groups.example.com',
+            listId=None,
+            emailMessage=m,
+            token=b'fake-token',
+            relayAddressPrefix='r-')
+
+        # We have a list-ID, so get_group_info_from_address should not be
+        # called
+        m_ggi.assert_called_once_with(
+            b'groups.example.com', False,
+            'example-group@groups.example.com', b'fake-token')
+        m_add_post.assert_called_onced_with(
+            b'groups.example.com', False, b'example-group', m,
+            b'fake-token')
