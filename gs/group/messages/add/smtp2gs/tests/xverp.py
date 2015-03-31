@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-##############################################################################
+############################################################################
 #
-# Copyright © 2014 OnlineGroups.net and Contributors.
+# Copyright © 2014, 2015 OnlineGroups.net and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -11,12 +11,12 @@
 # WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
 # FOR A PARTICULAR PURPOSE.
 #
-##############################################################################
+############################################################################
 from __future__ import absolute_import, unicode_literals
 from unittest import TestCase
 from mock import MagicMock
 from gs.group.messages.add.smtp2gs.xverp import (is_an_xverp_bounce,
-    handle_bounce)
+                                                 handle_bounce)
 import gs.group.messages.add.smtp2gs.xverp as smtp2gs_xverp
 
 
@@ -30,8 +30,8 @@ class TestXVERP(TestCase):
         self.assertTrue(r)
 
     def test_isnt_xverp(self):
-        '''Test that an ordinary address is seen as an ordinary address, rather
-        than an XVERP address'''
+        '''Test that an ordinary address is seen as an ordinary address,
+        rather than an XVERP address'''
         addr = 'development@groupsverver.org'
         r = is_an_xverp_bounce(addr)
         self.assertFalse(r)
