@@ -107,7 +107,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+#html_theme = 'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -235,7 +235,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'gsgroupmessagesaddsmtp2gs', u'gs.group.messages.add.smtp2gs Documentation',
+    ('script', 'smtp2gs', u'Add an email message to GroupServer',
      [u'GroupServer.org'], 1)
 ]
 
