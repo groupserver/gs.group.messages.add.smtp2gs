@@ -18,6 +18,7 @@ import sys
 from setuptools import setup, find_packages
 from version import get_version
 
+name='gs.group.messages.add.smtp2gs'
 version = get_version()
 
 # The argparse library was added to core in Python 2.7
@@ -37,7 +38,7 @@ with codecs.open(os.path.join("docs", "HISTORY.rst"),
     long_description += '\n' + f.read()
 
 setup(
-    name='gs.group.messages.add.smtp2gs',
+    name=name,
     version=version,
     description="The console script for adding a message to GroupServer.",
     long_description=long_description,
@@ -64,11 +65,11 @@ setup(
     keywords='groupserver, message, post, email, smtp, postfix',
     author='Michael JasonSmith',
     author_email='mpj17@onlinegroups.net',
-    url='https://github.com/groupserver/gs.group.messages.add.smtp2gs/',
+    url='https://github.com/groupserver/{0}'.format(name),
     license='ZPL 2.1',
     packages=find_packages(exclude=['ez_setup']),
-    namespace_packages=['gs', 'gs.group', 'gs.group.messages',
-                        'gs.group.messages.add'],
+    namespace_packages=['.'.join(name.split('.')[:i])
+                        for i in range(1, len(name.split('.')))],
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
@@ -78,9 +79,6 @@ setup(
     entry_points={
         'console_scripts': [
             'smtp2gs = gs.group.messages.add.smtp2gs.script:main',
-            ],
-        # --=mpj17=-- Entry points are the work of the devil. Some time
-        # you, me and Mr Soldering Iron are going to have a little chat
-        # about how to do things better.
-        },
+        ],
+    },
 )
