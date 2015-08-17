@@ -57,7 +57,7 @@ Optional Arguments
   (default ``default``).
 
 Returns
-=======
+-------
 
 :program:`smtp2gs` returns ``0`` on success, or a non-zero value
 on an error (following the convention specified in
@@ -67,7 +67,7 @@ system status code :rfc:`3463`. These include `transient errors`_
 and `permanent errors`_.
 
 Transient Errors
-----------------
+~~~~~~~~~~~~~~~~
 
 Any errors that can be solved by changing the configuration
 (either of :command:`postfix` or the :doc:`config`) are marked as
@@ -76,23 +76,23 @@ Any errors that can be solved by changing the configuration
 ======  ===================================  ==================================
  Code    Note                                 Fix
 ======  ===================================  ==================================
- 4.3.5   Error with the configuration file.   Correct the configuration file.
- 4.4.4   Error connecting to URL.             Check that the server is running, 
-                                              or alter the URL that is used to 
+ 4.3.5   Error with the configuration file.   Correct the :doc:`config`.
+ 4.4.4   Error connecting to URL.             Check that the server is running,
+                                              or alter the URL that is used to
                                               call :program:`smtp2gs`.
  4.4.5   The system is too busy.              Wait.
  4.5.0   Could not decode the data            *Usually* this is caused by an
-         returned by the server.              invalid token in the 
+         returned by the server.              invalid token in the
                                               :doc:`config`.
                                               Fix the token in the file.
- 4.5.2   No host in the URL.                  Alter the URL that is used in 
+ 4.5.2   No host in the URL.                  Alter the URL that is used in
                                               the call to :program:`smtp2gs` so
                                               it has a host-name.
 ======  ===================================  ==================================
 
 
 Permanent Errors
-----------------
+~~~~~~~~~~~~~~~~
 
 The five *permanent* errors are listed below.
 
@@ -108,37 +108,37 @@ The five *permanent* errors are listed below.
 ======  ======================================================================
 
 Examples
-========
+--------
 
 Adding a post to a group in the general case, where the email is
 read of standard input:
 
 .. code-block:: console
 
-  $ smtp2gs http://url.of.your.site
+  $ smtp2gs http://groups.example.com
 
 Over-riding the :mailheader:`x-original-to` header. This allows
 posts to an old email address to be sent to a new group.
 
 .. code-block:: console
 
-  $ smtp2gs --list newGroupId http://url.of.your.site
+  $ smtp2gs --list newGroupId http://groups.example.com
 
 Testing, by reading a file from :file:`/tmp`
 
 .. code-block:: console
 
-  $ smtp2gs --file /tmp/test.mbox http://url.of.your.site
+  $ smtp2gs --file /tmp/test.mbox http://groups.example.com
 
 Setting the maximum size of messages posted to a group to 1MiB
 
 .. code-block:: console
 
-  $ smtp2gs --max-size 1 http://url.of.your.site
+  $ smtp2gs --max-size 1 http://groups.example.com
 
 Using the token for a specific GroupServer instance called
 ``production``
 
 .. code-block:: console
 
-  $ smtp2gs --instance production http://url.of.your.site
+  $ smtp2gs --instance production http://groups.example.com
