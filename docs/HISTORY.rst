@@ -1,6 +1,11 @@
 Changelog
 =========
 
+3.0.4 (2015-08-17)
+------------------
+
+* Updating to the ``man`` page and product metadata
+
 3.0.3 (2015-05-12)
 ------------------
 
