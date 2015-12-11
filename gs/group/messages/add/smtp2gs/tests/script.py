@@ -109,7 +109,7 @@ British Gangland.'''
         # We have a list-ID, so get_group_info_from_address should not be
         # called
         self.assertEqual(0, m_ggi.call_count)
-        m_add_post.assert_called_onced_with(
+        m_add_post.assert_called_once_with(
             b'groups.example.com', False, b'example-group', m,
             b'fake-token')
 
@@ -145,7 +145,7 @@ British Gangland.'''
         m_ggi.assert_called_once_with(
             b'groups.example.com', False,
             'example-group@groups.example.com', b'fake-token')
-        m_add_post.assert_called_onced_with(
+        m_add_post.assert_called_once_with(
             b'groups.example.com', False, b'example-group', m,
             b'fake-token')
 
