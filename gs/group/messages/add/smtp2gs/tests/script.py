@@ -85,10 +85,11 @@ class TestScript(TestCase):
         cleanup_lock()
         self.assertEqual(0, gsscript.lock.release.call_count)
 
+    @patch('gs.group.messages.add.smtp2gs.script.sys')
     @patch('gs.group.messages.add.smtp2gs.script.'
            'get_group_info_from_address')
     @patch('gs.group.messages.add.smtp2gs.script.add_post')
-    def test_no_relay_if_listid(self, m_add_post, m_ggi):
+    def test_no_relay_if_listid(self, m_add_post, m_ggi, m_sys):
         'Ensure we do not try and relay the message if the list ID is set'
         m = '''To: example-group@example.com
 From: a.member@people.example.com
@@ -113,10 +114,11 @@ British Gangland.'''
             b'groups.example.com', False, b'example-group', m,
             b'fake-token')
 
+    @patch('gs.group.messages.add.smtp2gs.script.sys')
     @patch('gs.group.messages.add.smtp2gs.script.'
            'get_group_info_from_address')
     @patch('gs.group.messages.add.smtp2gs.script.add_post')
-    def test_orig_if_no_listid(self, m_add_post, m_ggi):
+    def test_orig_if_no_listid(self, m_add_post, m_ggi, m_sys):
         'Ensure we use the x-original-to if we lack a list-id'
         # The lack of the group address in any standard destination address
         # happens if BCC gets used.
