@@ -23,12 +23,12 @@ This product provides the ``smtp2gs`` script, which allows the
 external mail-transfer agent to add the message to
 GroupServer_. See `the documentation`_ for more information.
 
-.. _the documentation: http://groupserver.readthedocs.org/projects/gsgroupmessagesaddsmtp2gs/en/latest/
+.. _the documentation: http://groupserver.readthedocs.io/projects/gsgroupmessagesaddsmtp2gs/en/latest/
 
 Resources
 =========
 
-- Documentation: http://groupserver.readthedocs.org/projects/gsgroupmessagesaddsmtp2gs/en/latest/
+- Documentation: http://groupserver.readthedocs.io/projects/gsgroupmessagesaddsmtp2gs/en/latest/
 - Code repository: https://github.com/groupserver/gs.group.messages.add.smtp2gs
 - Questions and comments to http://groupserver.org/groups/development
 - Report bugs at https://redmine.iopen.net/projects/groupserver
