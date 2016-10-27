@@ -6,7 +6,7 @@
 Synopsis
 --------
 
-   :program:`smtp2gs` [:option:`-h`] [:option:`-m` <MAXSIZE>] [:option:`-l` <LISTID>] [:option:`-f` <FILE>] [:option:`-c` <CONFIG>] [:option:`-i` <INSTANCE>] :option:`url`
+   :program:`smtp2gs` [:option:`-h`] [:option:`-m` <MAXSIZE>] [:option:`-l` <LISTID>] [:option:`-f` <FILE>] [:option:`-t` {server,message}] [:option:`-c` <CONFIG>] [:option:`-i` <INSTANCE>] :option:`url`
 
 Description
 -----------
@@ -43,6 +43,13 @@ Optional Arguments
 
   The name of the file that contains the message. If omitted (or
   ``-``) standard-input will be read.
+
+.. option:: -t {server,message}, --time-source {server,message}
+
+   Where to get the time that the message was written. Using
+   ``server`` (the default) avoids issues caused by the clocks of
+   the group members being incorrect. Using ``message`` will
+   extract the post-time from the :mailheader:`Date` header.
 
 .. option:: -c <CONFIG>, --config <CONFIG>
 
@@ -135,6 +142,13 @@ Setting the maximum size of messages posted to a group to 1MiB
 .. code-block:: console
 
   $ smtp2gs --max-size 1 http://groups.example.com
+
+Using the time-stamp in the message, rather than the current time
+on the server.
+
+.. code-block:: console
+
+  $ smtp2gs --time-source message http://groups.example.com
 
 Using the token for a specific GroupServer instance called
 ``production``
