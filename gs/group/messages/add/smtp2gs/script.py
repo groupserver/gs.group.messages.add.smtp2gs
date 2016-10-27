@@ -25,14 +25,13 @@ if (sys.version_info < (3, )):
 else:
     from urllib.parse import urlparse  # lint:ok
 # GroupServer modules
-from gs.config import Config, ConfigError
+from gs.config import Config, ConfigError  # noqa: E234
 # Local modules
-from .errorvals import exit_vals
-from .getargs import get_args
-from .locker import get_lock
-from .servercomms import (get_group_info_from_address, NotOk, add_post,
-                          relay_email)
-from .xverp import is_an_xverp_bounce, handle_bounce
+from .errorvals import exit_vals  # noqa: E234
+from .getargs import get_args  # noqa: E234
+from .locker import get_lock  # noqa: E234
+from .servercomms import (get_group_info_from_address, NotOk, add_post, relay_email)  # noqa: E234
+from .xverp import is_an_xverp_bounce, handle_bounce  # noqa: E234
 
 
 class TimeSource(Enum):
@@ -139,11 +138,11 @@ is the process responsible for locking the lock.
 '''
     global weLocked, lock
     if weLocked:
-        ## VVVVVVVVVVVVVVVVVVVVVVVVVVV ##
-        ## vvvvvvvvvvvvvvvvvvvvvvvvvvv ##
+        # VVVVVVVVVVVVVVVVVVVVVVVVVVVVV #
+        # vvvvvvvvvvvvvvvvvvvvvvvvvvvvv #
         lock.release()  # Very important!
-        ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^ ##
-        ## AAAAAAAAAAAAAAAAAAAAAAAAAAA ##
+        # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #
+        # AAAAAAAAAAAAAAAAAAAAAAAAAAAAA #
 
 
 def MiB_to_B(mb):
