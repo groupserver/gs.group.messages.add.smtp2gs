@@ -2,7 +2,7 @@
 '''The core code for the ``smtp2gs`` script.'''
 ############################################################################
 #
-# Copyright © 2014, 2015 OnlineGroups.net and Contributors.
+# Copyright © 2014, 2015, 2016 OnlineGroups.net and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -17,6 +17,7 @@ from __future__ import absolute_import, unicode_literals, print_function
 # Standard modules
 import atexit
 from email import message_from_string
+from enum import Enum
 from socket import gaierror
 import sys
 if (sys.version_info < (3, )):
@@ -33,6 +34,12 @@ from .servercomms import (get_group_info_from_address, NotOk, add_post,
                           relay_email)
 from .xverp import is_an_xverp_bounce, handle_bounce
 
+
+class TimeSource(Enum):
+    '''Where to get the time-stamp of the post'''
+    message = 1  #: Get the time stamp from the :mailheader:`Date` header
+    server = 2  #: Get the time stamp from the clock on the server
+
 #: ``True`` if the current process is responsible for locking.
 weLocked = False
 
@@ -44,7 +51,7 @@ lock = None
 # alteration to the configuration then a 4.x.x error will be returned.
 
 
-def add_post_to_groupserver(progName, url, listId, emailMessage, token,
+def add_post_to_groupserver(progName, url, listId, timeSource, emailMessage, token,
                             relayAddressPrefix):
     '''Add a post to a GroupServer group.
 
@@ -54,6 +61,7 @@ def add_post_to_groupserver(progName, url, listId, emailMessage, token,
     If set to None or '' then the ``x-original-to`` header will be examined
     to determine the email address which is used to look up the ID of the
     group.
+:param TimeSource timeSource: Where to get the time-stamp of the message.
 :param str emailMessage: The entire email message to add (including the
                          header)
 :param str token: The authentiation token to pass to GroupServer.
@@ -223,7 +231,7 @@ authentication token, opens the email message, and then calls
         sys.exit(exit_vals['input_file_too_large'])
 
     try:
-        add_post_to_groupserver(sys.argv[0], args.url, args.listId,
+        add_post_to_groupserver(sys.argv[0], args.url, args.listId, TimeSource[args.timeSource],
                                 emailMessage, token, relayAddressPrefix)
     except gaierror as g:
         m = '4.4.4 Error connecting to the server while processing '\
