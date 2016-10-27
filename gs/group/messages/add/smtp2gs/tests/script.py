@@ -15,9 +15,10 @@
 from __future__ import absolute_import, unicode_literals
 from unittest import TestCase
 from mock import (MagicMock, patch)
+from gs.group.messages.add.smtp2gs import TimeSource
 from gs.group.messages.add.smtp2gs.script import (
-    get_token_from_config, get_relay_address_prefix_from_config,
-    cleanup_lock, add_post_to_groupserver)
+    get_token_from_config, get_relay_address_prefix_from_config, cleanup_lock,
+    add_post_to_groupserver)
 import gs.group.messages.add.smtp2gs.script as gsscript
 
 
@@ -103,6 +104,7 @@ British Gangland.'''
             progName='gs.group.messages.add.smtp2gs.tests.script',
             url=b'http://groups.example.com',
             listId=b'example-group',
+            timeSource=TimeSource.server,
             emailMessage=m,
             token=b'fake-token',
             relayAddressPrefix='r-')
@@ -115,8 +117,7 @@ British Gangland.'''
             b'fake-token')
 
     @patch('gs.group.messages.add.smtp2gs.script.sys')
-    @patch('gs.group.messages.add.smtp2gs.script.'
-           'get_group_info_from_address')
+    @patch('gs.group.messages.add.smtp2gs.script.get_group_info_from_address')
     @patch('gs.group.messages.add.smtp2gs.script.add_post')
     def test_orig_if_no_listid(self, m_add_post, m_ggi, m_sys):
         'Ensure we use the x-original-to if we lack a list-id'
@@ -138,6 +139,7 @@ British Gangland.'''
             progName='gs.group.messages.add.smtp2gs.tests.script',
             url=b'http://groups.example.com',
             listId=None,
+            timeSource=TimeSource.server,
             emailMessage=m,
             token=b'fake-token',
             relayAddressPrefix='r-')
@@ -169,6 +171,7 @@ British Gangland.'''
             progName='gs.group.messages.add.smtp2gs.tests.script',
             url=b'http://groups.example.com',
             listId=None,
+            timeSource=TimeSource.server,
             emailMessage=m,
             token=b'fake-token',
             relayAddressPrefix='z-')

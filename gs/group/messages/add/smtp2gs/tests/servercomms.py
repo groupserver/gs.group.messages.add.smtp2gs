@@ -17,6 +17,7 @@ from base64 import b64encode
 from mock import MagicMock
 from json import dumps as to_json
 from unittest import TestCase
+from gs.group.messages.add.smtp2gs import TimeSource
 import gs.group.messages.add.smtp2gs.servercomms as smtp2gs_servercomms
 
 
@@ -60,7 +61,7 @@ class TestServerComms(TestCase):
         message = b'I am a fish'  # Note: a byte-string
         token = 'token'
         smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.ok)
-        smtp2gs_servercomms.add_post(hostname, True, group, message, token)
+        smtp2gs_servercomms.add_post(hostname, True, group, TimeSource.message, message, token)
         self.assertEqual(1, smtp2gs_servercomms.post_multipart.call_count)
         args, kw_args = smtp2gs_servercomms.post_multipart.call_args
         self.assertEqual(hostname, args[0])
@@ -68,6 +69,7 @@ class TestServerComms(TestCase):
         fields = args[2]
         self.check_field(fields, 'form.groupId', group)
         self.check_field(fields, 'form.token', token)
+        self.check_field(fields, 'form.timeSource', 'message')
         self.check_field(fields, 'form.emailMessage', b64encode(message))
         self.assertIn('form.actions.add', fields)
         self.assertTrue(kw_args['usessl'])
@@ -75,9 +77,8 @@ class TestServerComms(TestCase):
     def test_add_post_fail(self):
         'Test a communications issue with adding a post.'
         smtp2gs_servercomms.post_multipart = MagicMock(return_value=self.fail)
-        self.assertRaises(smtp2gs_servercomms.NotOk,
-            smtp2gs_servercomms.add_post,
-            'gstest', True, 'development', b'I am a fish', 'token')
+        self.assertRaises(smtp2gs_servercomms.NotOk, smtp2gs_servercomms.add_post,
+            'gstest', True, 'development', TimeSource.server, b'I am a fish', 'token')
 
     def test_relay_email(self):
         'Test relaying a message through GroupServer'
