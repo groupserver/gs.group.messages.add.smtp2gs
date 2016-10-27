@@ -17,7 +17,6 @@ from __future__ import absolute_import, unicode_literals, print_function
 # Standard modules
 import atexit
 from email import message_from_string
-from enum import Enum
 from socket import gaierror
 import sys
 if (sys.version_info < (3, )):
@@ -27,17 +26,13 @@ else:
 # GroupServer modules
 from gs.config import Config, ConfigError  # noqa: E234
 # Local modules
+from . import TimeSource  # noqa: E234
 from .errorvals import exit_vals  # noqa: E234
 from .getargs import get_args  # noqa: E234
 from .locker import get_lock  # noqa: E234
 from .servercomms import (get_group_info_from_address, NotOk, add_post, relay_email)  # noqa: E234
 from .xverp import is_an_xverp_bounce, handle_bounce  # noqa: E234
 
-
-class TimeSource(Enum):
-    '''Where to get the time-stamp of the post'''
-    message = 1  #: Get the time stamp from the :mailheader:`Date` header
-    server = 2  #: Get the time stamp from the clock on the server
 
 #: ``True`` if the current process is responsible for locking.
 weLocked = False

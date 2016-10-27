@@ -2,7 +2,7 @@
 '''Utility functions for communicating to the GroupServer server.'''
 ##############################################################################
 #
-# Copyright © 2014 OnlineGroups.net and Contributors.
+# Copyright © 2014, 2016 OnlineGroups.net and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -20,8 +20,8 @@ if (sys.version_info < (3, )):
     from httplib import OK as HTTP_OK
 else:
     from http.client import OK as HTTP_OK  # lint:ok
-from json import loads as json_loads
-from gs.form import post_multipart
+from json import loads as json_loads  # noqa: E234
+from gs.form import post_multipart  # noqa: E234
 
 #: How long to wait for the HTTP connection to time out, in seconds.
 HTTP_TIMEOUT = 8  # seconds
@@ -68,13 +68,14 @@ and this is converted to a Python object before being returned
 ADD_POST_URI = '/gs-group-messages-add-email.html'
 
 
-def add_post(netloc, usessl, groupId, emailMessage, token):
+def add_post(netloc, usessl, groupId, timeSource, emailMessage, token):
     '''Add a post to a GroupServer Group.
 
 :param str netloc: The name of the GroupServer host to add the message to.
 :param bool usessl: ``True`` if TLS should be used to communicate with the
                     server.
 :param str groupId: The ID of the group to add the message to.
+:param TimeSource timeSource: Where to get the time-stamp of the post.
 :param str emailMessage: The entire email message to add.
 :param str token: The authentication token to pass to GroupServer.
 :raises NotOk: If the server (``hostname``) responds with something
@@ -87,7 +88,7 @@ message is base-64 encoded (see :func:`base64.b64encode`) before being sent.
     # we do this to ensure we have no problems with attachments
     emailMessage = b64encode(emailMessage)
     fields = {'form.emailMessage': emailMessage, 'form.groupId': groupId,
-              'form.token': token, 'form.actions.add': 'Add'}
+              'form.timeSource': timeSource.name, 'form.token': token, 'form.actions.add': 'Add'}
     status, reason, data = post_multipart(netloc, ADD_POST_URI,
                                           fields, usessl=usessl)
     if status != HTTP_OK:
