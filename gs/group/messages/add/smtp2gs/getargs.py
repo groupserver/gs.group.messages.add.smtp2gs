@@ -42,6 +42,10 @@ def get_args(configFileName):
                    help='The name of the file that contains the message. '
                         'If omitted (or "%(default)s") standard-input will '
                         'be read.')
+    p.add_argument('-t', '--time-source', choices=['server', 'message'], dest='timeSource',
+                   default='server',
+                   help='Where to get the time that the message was written. Using "%(default)s"'
+                        'avoids issues caused by the clocks of the group members being incorrect.')
     p.add_argument('-c', '--config', dest='config', default=configFileName,
                    type=str,
                    help='The name of the GroupServer configuration file '
