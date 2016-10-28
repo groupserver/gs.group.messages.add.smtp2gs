@@ -21,15 +21,16 @@ from version import get_version
 name='gs.group.messages.add.smtp2gs'
 version = get_version()
 
-# The argparse library was added to core in Python 2.7
-core = ['setuptools',
-        'lockfile',
-        'gs.config',  # Note: without zope-support
-        'gs.form', ]
-if sys.version_info > (2, 6):
-    requires = core
-else:
-    requires = core + ['argparse']
+requires = ['setuptools',
+            'lockfile',
+            'gs.config',  # Note: without zope-support
+            'gs.form', ]
+if sys.version_info < (2, 7):
+    # The argparse library was added to core in Python 2.7
+    requires.append('argparse')
+if sys.version_info < (3, 4):
+    # Enum was added in Python 3.4
+    requires.append('enum34')
 
 with codecs.open('README.rst', encoding='utf-8') as f:
     long_description = f.read()
