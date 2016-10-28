@@ -133,7 +133,7 @@ Good evening.
 On Ethel the Frog tonight we look at violence: the violence of
 British Gangland.'''
 
-        m_ggi.return_value = {'groupId': 'example-group'}
+        m_ggi.return_value = {'groupId': b'example-group'}
 
         add_post_to_groupserver(
             progName='gs.group.messages.add.smtp2gs.tests.script',
